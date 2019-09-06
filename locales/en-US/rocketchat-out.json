@@ -1,0 +1,22 @@
+{
+	"rocketchat-out": {
+		"label": {
+			"name": "Name",
+			"server": "Server",
+			"destination": "Type",
+			"room": "Room",
+			"autocomplete": "Find",
+			"sending": "Sending...",
+			"messageText": "Text",
+			"attachments": "Attachments"
+		},
+		"destinations": {
+			"users": "User",
+			"rooms": "Room"
+		},
+		"errors": {
+			"invalid-data": "Input data is missing",
+			"error-processing": "Errors processing request: __message__"
+		}
+	}
+}

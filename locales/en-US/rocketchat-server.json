@@ -1,0 +1,10 @@
+{
+	"rocketchat-server": {
+		"label": {
+			"name": "Name",
+			"host": "Server",
+			"user": "User Id",
+			"token": "Token"
+		}
+	}
+}

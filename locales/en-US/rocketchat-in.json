@@ -1,0 +1,21 @@
+{
+	"rocketchat-in": {
+		"label": {
+			"name": "Name",
+			"server": "Server",
+			"origin": "Origin type",
+			"room": "Room",
+			"autocomplete": "Find",
+			"receiving": "Receiving..."
+		},
+		"origins": {
+			"user": "User",
+			"room": "Room"
+		},
+		"errors": {
+			"invalid-data": "Input data is missing",
+			"error-processing": "Errors processing request: __message__",
+			"connection-broken": "Connection broken, trying to reconnect..."
+		}
+	}
+}

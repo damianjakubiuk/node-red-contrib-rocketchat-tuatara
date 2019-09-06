@@ -1,40 +1,76 @@
-module.exports = function (RED) {
-  "use strict";
+const api = require('./rocketchat');
 
-  function RocketChatOut(n) {
-    RED.nodes.createNode(this, n);
-    const node = this;
-    const RocketChatApi = require('./rocket-chat').RocketChatApi;
+module.exports = function(RED) {
+	'use strict';
 
-    node.on('input', function (msg) {
-      node.server = RED.nodes.getNode(n.server); // Retrieve the config node
-      if (node.server.host.indexOf('http') < 0) {
-        node.server.host = 'http://' + node.server.host;
-      }
-      let url;
-      try {
-        url = new URL(node.server.host);
-      } catch (e) {
-        node.error(e, msg);
-      }
-      let rocketChatApi = new RocketChatApi(url.protocol, url.hostname, url.port, node.server.user, node.server.credentials.password, "v1");
-      rocketChatApi.getPublicRooms(function (err, body) {
-        if (!err) {
-          node.status({fill: "blue", shape: "dot", text: "Connected"});
-          let rooms = body.channels.filter(f => f.name == n.room);
-          if (rooms.length === 1) {
-            rocketChatApi.sendMsg(rooms[0]._id, msg.payload, function () {
-              node.send(msg);
-            });
-          } else {
-            node.status({fill: "red", shape: "ring", text: "Error:" + err});
-          }
-        } else {
-          node.status({fill: "red", shape: "ring", text: "Error:" + err});
-        }
-      });
-    });
-  }
+	function RocketChatOut(config) {
+		RED.nodes.createNode(this, config);
+		const node = this;
+		node.server = RED.nodes.getNode(config.server);
 
-  RED.nodes.registerType("rocketchat-out", RocketChatOut);
-}
+		const { messageText, messageTextType, attachments: configAttachments, attachmentsType, room, roomType, roomData } = config;
+
+		node.on('input', async function(msg) {
+			const { host, user, token } = node.server;
+
+			const apiInstance = api({ host, user, token });
+
+			let roomId;
+			if (roomType === 'form') {
+				const { i } = JSON.parse(roomData);
+				roomId = i;
+			} else {
+				roomId = RED.util.evaluateNodeProperty(room, roomType, this, msg);
+			}
+
+			const text = RED.util.evaluateNodeProperty(messageText, messageTextType, this, msg);
+			const attachments = RED.util.evaluateNodeProperty(configAttachments, attachmentsType, this, msg);
+
+			if (roomId == null) {
+				node.warn(RED._('rocketchat-out.errors.invalid-data'));
+				node.status({ fill: 'red', shape: 'ring', text: 'rocketchat-out.errors.invalid-data' });
+				return;
+			}
+
+			if (config.destination === 'users') {
+				node.status({ fill: 'blue', shape: 'dot', text: 'rocketchat-out.label.sending' });
+				try {
+					const { success, room, errors } = await apiInstance.createIM({ username: roomId });
+					if (success) {
+						const { _id } = room;
+						roomId = _id;
+					} else {
+						node.error(RED._('rocketchat-out.errors.error-processing', errors));
+						node.status({
+							fill: 'red',
+							shape: 'ring',
+							text: RED._('rocketchat-out.errors.error-processing', errors)
+						});
+					}
+				} catch (error) {
+					node.error(RED._('rocketchat-out.errors.error-processing', error));
+					node.status({
+						fill: 'red',
+						shape: 'ring',
+						text: RED._('rocketchat-out.errors.error-processing', error)
+					});
+				}
+			}
+
+			node.status({ fill: 'blue', shape: 'dot', text: 'rocketchat-out.label.sending' });
+			try {
+				await apiInstance.send({ roomId, text, attachments });
+			} catch (error) {
+				node.error(RED._('rocketchat-out.errors.error-processing', error));
+				node.status({
+					fill: 'red',
+					shape: 'ring',
+					text: RED._('rocketchat-out.errors.error-processing', error)
+				});
+			}
+			node.status({});
+		});
+	}
+
+	RED.nodes.registerType('rocketchat-out', RocketChatOut);
+};
