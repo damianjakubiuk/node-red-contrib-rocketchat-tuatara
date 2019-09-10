@@ -1,0 +1,155 @@
+<script type="text/x-red" data-template-name="rocketchat-out">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="rocketchat-out.label.name"></span></label>
+		<input type="text" id="node-input-name" data-i18n="[placeholder]rocketchat-out.label.name">
+	</div>
+	<div class="form-row">
+		<label for="node-input-server"><i class="fa fa-rocket"></i> <span data-i18n="rocketchat-out.label.server"></span></label>
+		<input type="text" id="node-input-server" data-i18n="[placeholder]rocketchat-out.label.server">
+	</div>
+	<div class="form-row server-dependent">
+		<label for="node-input-destination"><i class="fa fa-inbox"></i> <span data-i18n="rocketchat-out.label.destination"></span></label>
+		<select id="node-input-destination" style="width: 70%">
+			<option value="users" data-i18n="rocketchat-out.destinations.users"></option>
+			<option value="rooms" data-i18n="rocketchat-out.destinations.rooms"></option>
+		</select>
+	</div>
+	<div class="form-row server-dependent">
+		<label for="node-input-room"><i class="fa fa-hashtag"></i>  <span data-i18n="rocketchat-out.label.room"></span></label>
+		<input type="text" style="width: 70%;" id="node-input-room" data-i18n="[placeholder]rocketchat-out.label.room">
+		<div id="room-autocomplete-row" class="form-row" style="margin-top: 5px; margin-left: 104px;width: 70%;display:none;">
+			<input type="text" style="width: 100%;" id="node-input-room-autocomplete" data-i18n="[placeholder]rocketchat-out.label.autocomplete">
+			<input type="hidden" id="node-input-room-autocomplete-id">
+		</div>
+	</div>
+
+	<div class="form-row server-dependent">
+		<label for="node-input-messageText"><i class="fa fa-commenting-o"></i> <span data-i18n="rocketchat-out.label.messageText"></span></label>
+		<input type="text" id="node-input-messageText" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.messageText">
+	</div>
+	<div class="form-row server-dependent">
+		<label for="node-input-attachments"><i class="fa fa-paperclip"></i> <span data-i18n="rocketchat-out.label.attachments"></span></label>
+		<input type="text" id="node-input-attachments" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.attachments">
+	</div>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('rocketchat-out', {
+		category: 'Rocket․Chat',
+		color: '#F98F9D',
+		paletteLabel: 'Sender',
+		defaults: {
+			name: { value: '' },
+			server: { value: '', type: 'rocketchat-server' },
+			destination: { value: 'users' },
+			room: { value: '' },
+			roomType: { value: 'form' },
+			roomData: { value: '' },
+			messageText: { value: '', validate: RED.validators.typedInput('messageTextType') },
+			messageTextType: { value: 'str' },
+			attachments: { value: '[]', validate: RED.validators.typedInput('attachmentsType') },
+			attachmentsType: { value: 'json' }
+		},
+		inputs: 1,
+		outputs: 0,
+		icon: 'rocketchat.png',
+		align: 'right',
+		label: function() {
+			return this.name || 'Rocket․Chat Sender';
+		},
+		oneditprepare: function() {
+			const node = this;
+			$('#node-input-server').change(function() {
+				const server = $(this).val();
+				if (server === '_ADD_') {
+					$('.server-dependent').hide();
+				} else {
+					$('.server-dependent').show();
+				}
+			});
+			$('#node-input-room')
+				.typedInput({
+					default: node.roomType || 'form',
+					types: [
+						'msg',
+						'flow',
+						'global',
+						'env',
+						{
+							value: 'form',
+							label: node._('rocketchat-out.label.autocomplete'),
+							hasValue: false
+						}
+					]
+				})
+				.change(function() {
+					var type = $(this).typedInput('type');
+					if (type === 'form') {
+						$('#room-autocomplete-row').show();
+						$('#node-input-room-autocomplete').focus();
+					} else {
+						$('#room-autocomplete-row').hide();
+					}
+				});
+
+			$('#node-input-room-autocomplete').autocomplete({
+				source: function(request, response) {
+					const server = $('#node-input-server').val();
+					$.ajax({
+						url: 'rocketchat-server/' + server + '/spotlight/' + request.term,
+						type: 'GET',
+						dataType: 'json',
+						success: options => {
+							const destination = $('#node-input-destination').val() || 'users';
+							return response(
+								(options[destination] || []).map(opt => ({
+									id: destination === 'users' ? opt.username : opt._id,
+									value: opt.name
+								}))
+							);
+						}
+					});
+				},
+				minLength: 2,
+				select: function(event, ui) {
+					$('#node-input-room-autocomplete-id').val(ui.item.id);
+				}
+			});
+
+			$('#node-input-messageText').typedInput({
+				default: node.messageTextType || 'str',
+				types: ['msg', 'flow', 'global', 'env', 'str']
+			});
+
+			$('#node-input-attachments').typedInput({
+				default: node.attachmentsType || 'json',
+				types: ['msg', 'flow', 'global', 'env', 'json']
+			});
+
+			$('#node-input-messageText').typedInput('value', node.messageText);
+			$('#node-input-messageText').typedInput('type', node.messageTextType);
+			$('#node-input-attachments').typedInput('value', node.attachments);
+			$('#node-input-attachments').typedInput('type', node.attachmentsType);
+
+			if (node.roomType === 'form') {
+				const { i, l } = JSON.parse(node.roomData);
+				$('#node-input-room-autocomplete').val(l);
+				$('#node-input-room-autocomplete-id').val(i);
+			}
+		},
+		oneditsave: function() {
+			const node = this;
+			node.roomType = $('#node-input-room').typedInput('type');
+			node.messageTextType = $('#node-input-messageText').typedInput('type');
+			node.attachmentsType = $('#node-input-attachments').typedInput('type');
+			if (node.roomType === 'form') {
+				node.roomData = JSON.stringify({
+					i: $('#node-input-room-autocomplete-id').val(),
+					l: $('#node-input-room-autocomplete').val()
+				});
+			} else {
+				node.roomData = '{}';
+			}
+		}
+	});
+</script>

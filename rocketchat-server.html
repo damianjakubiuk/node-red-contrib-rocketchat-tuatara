@@ -1,0 +1,33 @@
+<script type="text/x-red" data-template-name="rocketchat-server">
+	<div class="form-row">
+		<label for="node-config-input-name"><i class="fa fa-tag"></i> <span data-i18n="rocketchat-server.label.name"></label>
+		<input type="text" id="node-config-input-name" data-i18n="[placeholder]rocketchat-server.label.name">
+	</div>
+	<div class="form-row">
+	  <label for="node-config-input-host"><i class="fa fa-tasks"></i> <span data-i18n="rocketchat-server.label.host"></label>
+	  <input type="text" id="node-config-input-host" data-i18n="[placeholder]rocketchat-server.label.host">
+	</div>
+	<div class="form-row">
+	  <label for="node-config-input-user"><i class="fa fa-tasks"></i> <span data-i18n="rocketchat-server.label.user"></label>
+	  <input type="text" id="node-config-input-user" data-i18n="[placeholder]rocketchat-server.label.user">
+	</div>
+	<div class="form-row">
+		<label for="node-config-input-token"><i class="fa fa-tasks"></i> <span data-i18n="rocketchat-server.label.token"></label>
+		<input type="text" id="node-config-input-token" data-i18n="[placeholder]rocketchat-server.label.token">
+	</div>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('rocketchat-server', {
+		category: 'config',
+		defaults: {
+			name: { value: '', required: true },
+			host: { value: '', required: true },
+			user: { value: '', required: true },
+			token: { value: '', required: true }
+		},
+		label: function() {
+			return this.name || this.user + '@' + this.host;
+		}
+	});
+</script>

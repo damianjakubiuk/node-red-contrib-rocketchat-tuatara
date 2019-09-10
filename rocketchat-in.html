@@ -1,60 +1,130 @@
 <script type="text/x-red" data-template-name="rocketchat-in">
-    <div class="form-row">
-        <label for="node-input-host"><i class="fa fa-tasks"></i> Host</label>
-        <input type="text" id="node-input-host" placeholder="xxx.xxx.xxx.xxx">
-    </div>
-    <div class="form-row">
-        <label for="node-input-port"><i class="fa fa-tasks"></i> Port</label>
-        <input type="text" id="node-input-port" placeholder="3000">
-    </div>
-    <div class="form-row">
-        <label for="node-input-user"><i class="fa fa-tasks"></i> User</label>
-        <input type="text" id="node-input-user" placeholder="User">
-    </div>
-    <div class="form-row">
-        <label for="node-input-password"><i class="fa fa-tasks"></i> Password</label>
-        <input type="password" id="node-input-password" placeholder="Password">
-    </div>
-    <br/>
-    <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
-    </div>
-</script>
-
-<script type="text/x-red" data-help-name="rocketchat-in">
-   <p>Simple sample input node. Just sends a single message when it starts up.
-   This is not very useful.</p>
-   <p>Outputs an object called <code>msg</code> containing <code>msg.topic</code> and
-   <code>msg.payload</code>. msg.payload is a String.</p>
+	<div class="form-row">
+	  <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="rocketchat-in.label.name"></span></label>
+	  <input type="text" id="node-input-name" placeholder="Name">
+	</div>
+	<div class="form-row">
+	  <label for="node-input-server"><i class="fa fa-tasks"></i> <span data-i18n="rocketchat-in.label.server"></span></label>
+	  <input type="text" id="node-input-server" data-i18n="[placeholder]rocketchat-in.label.server">
+	</div>
+	<div class="form-row server-dependent">
+		<label for="node-input-origin"><i class="fa fa-inbox"></i> <span data-i18n="rocketchat-in.label.origin"></span></label>
+		<select id="node-input-origin" style="width: 70%">
+			<option value="user" data-i18n="rocketchat-in.origins.user"></option>
+			<option value="room" data-i18n="rocketchat-in.origins.room"></option>
+		</select>
+	</div>
+	<div id="row-room" class="form-row" style="display: none;">
+		<label for="node-input-room"><i class="fa fa-hashtag"></i>  <span data-i18n="rocketchat-in.label.room"></span></label>
+		<input type="text" style="width: 70%;" id="node-input-room" data-i18n="[placeholder]rocketchat-in.label.room">
+		<div id="room-autocomplete-row" class="form-row" style="margin-top: 5px; margin-left: 104px;width: 70%;display:none;">
+			<input type="text" style="width: 100%;" id="node-input-room-autocomplete" data-i18n="[placeholder]rocketchat-in.label.autocomplete">
+			<input type="hidden" id="node-input-room-autocomplete-id">
+		</div>
+	</div>
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('rocketchat-in',{
-        category: 'social',
-        color: '#c1272d',
-        defaults: {
-            name: {value:""}
-        },
-        credentials: {
-            host: {
-                type: "text"
-            },
-            port: {
-                type: "text"
-            },
-            user: {
-                type: "text"
-            },
-            password: {
-                type: "password"
-            }
-        },
-        inputs: 0,
-        outputs: 1,
-        icon: "rocketchat.png",
-        label: function() {
-            return this.name || "rocketchat";
-        }
-    });
+	RED.nodes.registerType('rocketchat-in', {
+		category: 'Rocket․Chat',
+		color: '#F98F9D',
+		paletteLabel: 'Receiver',
+		defaults: {
+			name: { value: '' },
+			server: { value: '', type: 'rocketchat-server' },
+			origin: { value: 'user' },
+			room: { value: '' },
+			roomType: { value: 'form' },
+			roomData: { value: '' }
+		},
+		inputs: 0,
+		outputs: 1,
+		icon: 'rocketchat.png',
+		label: function() {
+			return this.name || 'Rocket.Chat Receiver';
+		},
+		oneditprepare: function() {
+			const node = this;
+			$('#node-input-server').change(function() {
+				const server = $(this).val();
+				if (server === '_ADD_') {
+					$('.server-dependent').hide();
+				} else {
+					$('.server-dependent').show();
+				}
+			});
+			$('#node-input-origin').change(function() {
+				const origin = $(this).val();
+				if (origin === 'room') {
+					$('#row-room').show();
+				} else {
+					$('#row-room').hide();
+				}
+			});
+			$('#node-input-room')
+				.typedInput({
+					default: node.roomType || 'form',
+					types: [
+						'msg',
+						'flow',
+						'global',
+						'env',
+						{
+							value: 'form',
+							label: node._('rocketchat-in.label.autocomplete'),
+							hasValue: false
+						}
+					]
+				})
+				.change(function() {
+					var type = $(this).typedInput('type');
+					if (type === 'form') {
+						$('#room-autocomplete-row').show();
+						$('#node-input-room-autocomplete').focus();
+					} else {
+						$('#room-autocomplete-row').hide();
+					}
+				});
+
+			$('#node-input-room-autocomplete').autocomplete({
+				source: function(request, response) {
+					const server = $('#node-input-server').val();
+					$.ajax({
+						url: 'rocketchat-server/' + server + '/spotlight/' + request.term,
+						type: 'GET',
+						dataType: 'json',
+						success: options => {
+							return response(
+								(options.rooms || []).map(opt => ({
+									id: opt._id,
+									value: opt.name
+								}))
+							);
+						}
+					});
+				},
+				minLength: 2,
+				select: function(event, ui) {
+					$('#node-input-room-autocomplete-id').val(ui.item.id);
+				}
+			});
+			if (node.roomType === 'form') {
+				const { i, l } = JSON.parse(node.roomData);
+				$('#node-input-room-autocomplete').val(l);
+				$('#node-input-room-autocomplete-id').val(i);
+			}
+		},
+		oneditsave: function() {
+			const node = this;
+			node.roomType = $('#node-input-room').typedInput('type');
+			if (node.roomType === 'form') {
+				node.roomData = JSON.stringify({
+					i: $('#node-input-room-autocomplete-id').val(),
+					l: $('#node-input-room-autocomplete').val()
+				});
+			} else {
+				node.roomData = '{}';
+			}
+		}
+	});
 </script>
