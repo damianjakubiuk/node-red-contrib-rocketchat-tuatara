@@ -1,0 +1,80 @@
+<script type="text/x-red" data-template-name="rocketchat-create">
+	<div class="form-row">
+	  <label for="node-input-server"><i class="fa fa-tasks"></i> <span data-i18n="rocketchat-create.label.server"></span></label>
+	  <input type="text" id="node-input-server" data-i18n="[placeholder]rocketchat-create.label.server">
+	</div>
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+		<input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
+	</div>
+	<div class="form-row">
+		<label for="node-input-roomType"><i class="fa fa-inbox"></i> <span data-i18n="rocketchat-create.label.roomType"></span></label>
+		<select id="node-input-roomType" style="width: 70%">
+			<option value="channel" data-i18n="rocketchat-create.types.channel"></option>
+			<option value="group" data-i18n="rocketchat-create.types.group"></option>
+		</select>
+	</div>
+	<div class="form-row">
+		<label for="node-input-roomName"><i class="fa fa-tag"></i> <span data-i18n="rocketchat-create.label.roomName"></span></label>
+		<input type="text" id="node-input-roomName" style="width: 70%" data-i18n="[placeholder]rocketchat-create.label.roomName">
+	</div>
+	<div class="form-row">
+		<label for="node-input-users"><i class="fa fa-tag"></i> <span data-i18n="rocketchat-create.label.users"></span></label>
+		<input type="text" id="node-input-users" style="width: 70%" data-i18n="[placeholder]rocketchat-create.label.users">
+	</div>
+	<div class="form-row">
+		<label for="node-input-readOnly"><i class="fa fa-random"></i> <span data-i18n="rocketchat-create.label.readOnly"></span></label>
+		<label for="node-input-readOnly" style="width:70%">
+		<input type="checkbox" id="node-input-readOnly" style="display:inline-block; width:22px; vertical-align:baseline;"><span data-i18n="rocketchat-create.label.readOnlyDescription"></span>
+		</label>
+	</div>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('rocketchat-create', {
+		category: 'Rocket․Chat',
+		color: '#F98F9D',
+		paletteLabel: 'Create Room',
+		defaults: {
+			name: { value: '' },
+			server: { value: '', type: 'rocketchat-server', required: true },
+			roomType: { value: 'group', required: true },
+			roomName: { value: '', required: true, validate: RED.validators.typedInput('roomNameType') },
+			roomNameType: { value: 'str' },
+			users: { value: '', required: true, validate: RED.validators.typedInput('usersType') },
+			usersType: { value: 'str' },
+			readOnly: { value: false }
+		},
+		inputs: 1,
+		outputs: 1,
+		icon: 'rocketchat.png',
+		label: function() {
+			return this.name || 'Rocket.Chat Create Room';
+		},
+		oneditprepare: function() {
+			const node = this;
+
+			$('#node-input-roomName').typedInput({
+				default: node.roomNameType || 'str',
+				types: ['msg', 'flow', 'global', 'env', 'str']
+			});
+
+			$('#node-input-users').typedInput({
+				default: node.usersType || 'str',
+				types: ['msg', 'flow', 'global', 'env', 'json', 'str']
+			});
+
+			if (node.roomName != null) {
+				$('#node-input-roomName').typedInput('value', node.roomName);
+			}
+			if (node.users != null) {
+				$('#node-input-users').typedInput('value', node.users);
+			}
+		},
+		oneditsave: function() {
+			const node = this;
+			node.roomNameType = $('#node-input-roomName').typedInput('type');
+			node.usersType = $('#node-input-users').typedInput('type');
+		}
+	});
+</script>

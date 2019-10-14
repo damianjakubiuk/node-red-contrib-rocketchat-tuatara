@@ -21,6 +21,7 @@
 		"nodes": {
 			"rocketchat-in": "rocketchat-in.js",
 			"rocketchat-out": "rocketchat-out.js",
+			"rocketchat-create": "rocketchat-create.js",
 			"rocketchat-server": "rocketchat-server.js"
 		}
 	},
