@@ -1,0 +1,20 @@
+{
+	"rocketchat-create": {
+		"label": {
+			"server": "Server",
+			"roomType": "Type",
+			"roomName": "Room Name",
+			"users": "Users to add",
+			"readOnly": "Read only",
+			"readOnlyDescription": "This room is read only"
+		},
+		"types": {
+			"channel": "Public Channel",
+			"group": "Private Group"
+		},
+		"errors": {
+			"invalid-data": "Input data is missing",
+			"error-processing": "Errors processing request: __message__"
+		}
+	}
+}

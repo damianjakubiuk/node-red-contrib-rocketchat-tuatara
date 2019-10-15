@@ -104,5 +104,31 @@ module.exports = ({ host, user, token }) => ({
 			}
 		);
 		return data;
+	},
+	async createChannel({ name, members, readOnly = false }) {
+		const { data } = await axios.post(
+			`${host}/api/v1/channels.create`,
+			{ name, members, readOnly },
+			{
+				headers: {
+					'X-Auth-Token': token,
+					'X-User-Id': user
+				}
+			}
+		);
+		return data;
+	},
+	async createGroup({ name, members, readOnly = false }) {
+		const { data } = await axios.post(
+			`${host}/api/v1/groups.create`,
+			{ name, members, readOnly },
+			{
+				headers: {
+					'X-Auth-Token': token,
+					'X-User-Id': user
+				}
+			}
+		);
+		return data;
 	}
 });
