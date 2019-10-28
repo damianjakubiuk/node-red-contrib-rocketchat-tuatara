@@ -149,6 +149,11 @@ module.exports = function(RED) {
 					ws.terminate();
 					setTimeout(startListening, 10000);
 				});
+
+				// Safelly handle ws errors so it doesn't break the application
+				// Will forward internal errors to catch
+				ws.onerror = () => {};
+
 				ws.on('message', data => {
 					const { id, msg, error, fields } = EJSON.parse(data);
 
