@@ -8,7 +8,21 @@ module.exports = function(RED) {
 		const node = this;
 		node.server = RED.nodes.getNode(config.server);
 
-		const { messageText, messageTextType, attachments: configAttachments, attachmentsType, room, roomType, roomData } = config;
+		const {
+			messageText,
+			messageTextType,
+			avatarText,
+			avatarTextType,
+			aliasText,
+			aliasTextType,
+			emojiText,
+			emojiTextType,
+			attachments: configAttachments,
+			attachmentsType,
+			room,
+			roomType,
+			roomData
+		} = config;
 
 		node.on('input', async function(msg) {
 			const { host, user, token } = node.server;
@@ -23,6 +37,9 @@ module.exports = function(RED) {
 				roomId = RED.util.evaluateNodeProperty(room, roomType, this, msg);
 			}
 
+			const avatar = RED.util.evaluateNodeProperty(avatarText, avatarTextType, this, msg);
+			const alias = RED.util.evaluateNodeProperty(aliasText, aliasTextType, this, msg);
+			const emoji = RED.util.evaluateNodeProperty(emojiText, emojiTextType, this, msg);
 			const text = RED.util.evaluateNodeProperty(messageText, messageTextType, this, msg);
 			const attachments = RED.util.evaluateNodeProperty(configAttachments, attachmentsType, this, msg);
 
@@ -59,7 +76,14 @@ module.exports = function(RED) {
 
 			node.status({ fill: 'blue', shape: 'dot', text: 'rocketchat-out.label.sending' });
 			try {
-				await apiInstance.send({ roomId, text, attachments });
+				await apiInstance.send({
+					roomId,
+					text,
+					attachments,
+					alias,
+					avatar,
+					emoji
+				});
 			} catch (error) {
 				node.error(RED._('rocketchat-out.errors.error-processing', error));
 				node.status({

@@ -26,10 +26,10 @@ module.exports = ({ host, user, token }) => ({
 		);
 		return data;
 	},
-	async send({ roomId, text, attachments }) {
+	async send({ roomId, text, attachments, alias, avatar, emoji }) {
 		const { data } = await axios.post(
 			`${host}/api/v1/chat.postMessage`,
-			{ roomId, text, attachments },
+			{ roomId, text, alias, emoji, avatar, attachments },
 			{
 				headers: {
 					'X-Auth-Token': token,
