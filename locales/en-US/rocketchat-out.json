@@ -7,6 +7,9 @@
 			"room": "Room",
 			"autocomplete": "Find",
 			"sending": "Sending...",
+			"avatar": "Avatar",
+			"alias": "Alias",
+			"emoji": "Emoji",
 			"messageText": "Text",
 			"attachments": "Attachments"
 		},

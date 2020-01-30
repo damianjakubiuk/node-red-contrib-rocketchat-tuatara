@@ -24,6 +24,18 @@
 	</div>
 
 	<div class="form-row server-dependent">
+		<label for="node-input-avatarText"><i class="fa fa-file-image-o"></i> <span data-i18n="rocketchat-out.label.avatar"></span></label>
+		<input type="text" id="node-input-avatarText" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.avatar">
+	</div>
+	<div class="form-row server-dependent">
+		<label for="node-input-emojiText"><i class="fa fa-user-o"></i> <span data-i18n="rocketchat-out.label.emoji"></span></label>
+		<input type="text" id="node-input-emojiText" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.emoji">
+	</div>
+	<div class="form-row server-dependent">
+		<label for="node-input-aliasText"><i class="fa fa-envelope-open-o"></i> <span data-i18n="rocketchat-out.label.alias"></span></label>
+		<input type="text" id="node-input-aliasText" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.alias">
+	</div>
+	<div class="form-row server-dependent">
 		<label for="node-input-messageText"><i class="fa fa-commenting-o"></i> <span data-i18n="rocketchat-out.label.messageText"></span></label>
 		<input type="text" id="node-input-messageText" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.messageText">
 	</div>
@@ -45,6 +57,12 @@
 			room: { value: '' },
 			roomType: { value: 'form' },
 			roomData: { value: '' },
+			avatarText: { value: '', validate: RED.validators.typedInput('avatarTextType') },
+			avatarTextType: { value: 'str' },
+			aliasText: { value: '', validate: RED.validators.typedInput('aliasTextType') },
+			aliasTextType: { value: 'str' },
+			emojiText: { value: '', validate: RED.validators.typedInput('emojiTextType') },
+			emojiTextType: { value: 'str' },
 			messageText: { value: '', validate: RED.validators.typedInput('messageTextType') },
 			messageTextType: { value: 'str' },
 			attachments: { value: '[]', validate: RED.validators.typedInput('attachmentsType') },
@@ -128,6 +146,12 @@
 
 			$('#node-input-messageText').typedInput('value', node.messageText);
 			$('#node-input-messageText').typedInput('type', node.messageTextType);
+			$('#node-input-aliasText').typedInput('value', node.aliasText);
+			$('#node-input-aliasText').typedInput('type', node.aliasTextType);
+			$('#node-input-avatarText').typedInput('value', node.avatarText);
+			$('#node-input-avatarText').typedInput('type', node.avatarTextType);
+			$('#node-input-emojiText').typedInput('value', node.emojiText);
+			$('#node-input-emojiText').typedInput('type', node.emojiTextType);
 			$('#node-input-attachments').typedInput('value', node.attachments);
 			$('#node-input-attachments').typedInput('type', node.attachmentsType);
 
@@ -141,6 +165,9 @@
 			const node = this;
 			node.roomType = $('#node-input-room').typedInput('type');
 			node.messageTextType = $('#node-input-messageText').typedInput('type');
+			node.aliasTextType = $('#node-input-aliasText').typedInput('type');
+			node.avatarTextType = $('#node-input-avatarText').typedInput('type');
+			node.emojiTextType = $('#node-input-emojiText').typedInput('type');
 			node.attachmentsType = $('#node-input-attachments').typedInput('type');
 			if (node.roomType === 'form') {
 				node.roomData = JSON.stringify({
