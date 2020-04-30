@@ -3,7 +3,7 @@ const EJSON = require('ejson');
 const url = require('url');
 const api = require('./rocketchat');
 
-module.exports = function(RED) {
+module.exports = function (RED) {
 	'use strict';
 
 	function RocketChatIn(config) {
@@ -47,15 +47,19 @@ module.exports = function(RED) {
 					if (success) {
 						update.forEach(async ({ rid, ls, unread, t }) => {
 							if (t === 'd' && unread > 0) {
-								const { success, messages = [] } = await apiInstance.getUnreadMessages({ roomId: rid, oldest: ls, type: t });
+								const { success, messages = [] } = await apiInstance.getUnreadMessages({
+									roomId: rid,
+									oldest: ls,
+									type: t,
+								});
 								if (success) {
-									messages.forEach(async message => {
+									messages.forEach(async (message) => {
 										const {
-											u: { _id: fromUser }
+											u: { _id: fromUser },
 										} = message;
 										if (fromUser !== user) {
 											node.send({
-												payload: message
+												payload: message,
 											});
 										}
 									});
@@ -71,15 +75,19 @@ module.exports = function(RED) {
 						...rest
 					} = await apiInstance.getSubscription({ roomId });
 					if (success) {
-						const { success, messages = [] } = await apiInstance.getUnreadMessages({ roomId, oldest: ls, type: t });
+						const { success, messages = [] } = await apiInstance.getUnreadMessages({
+							roomId,
+							oldest: ls,
+							type: t,
+						});
 						if (success) {
-							messages.forEach(async message => {
+							messages.forEach(async (message) => {
 								const {
-									u: { _id: fromUser }
+									u: { _id: fromUser },
 								} = message;
 								if (fromUser !== user) {
 									node.send({
-										payload: message
+										payload: message,
 									});
 								}
 							});
@@ -92,7 +100,7 @@ module.exports = function(RED) {
 				node.status({
 					fill: 'red',
 					shape: 'ring',
-					text: RED._('rocketchat-in.errors.error-processing', error)
+					text: RED._('rocketchat-in.errors.error-processing', error),
 				});
 			}
 		};
@@ -103,7 +111,7 @@ module.exports = function(RED) {
 
 				let ws = new WebSocket(endpoint);
 
-				const wsSend = message => {
+				const wsSend = (message) => {
 					ws.send(EJSON.stringify(message));
 				};
 
@@ -112,7 +120,7 @@ module.exports = function(RED) {
 						msg: 'method',
 						method: 'login',
 						params: [{ resume: token }],
-						id: '1'
+						id: '1',
 					};
 					wsSend(loginMessage);
 				};
@@ -122,7 +130,7 @@ module.exports = function(RED) {
 						msg: 'sub',
 						id: '2',
 						name: 'stream-room-messages',
-						params: [roomId, true]
+						params: [roomId, true],
 					});
 				};
 
@@ -139,7 +147,7 @@ module.exports = function(RED) {
 					wsSend({
 						msg: 'connect',
 						version: '1',
-						support: ['1']
+						support: ['1'],
 					});
 				});
 
@@ -154,7 +162,7 @@ module.exports = function(RED) {
 				// Will forward internal errors to catch
 				ws.onerror = () => {};
 
-				ws.on('message', data => {
+				ws.on('message', (data) => {
 					const { id, msg, error, fields } = EJSON.parse(data);
 
 					switch (msg) {
@@ -173,7 +181,7 @@ module.exports = function(RED) {
 									node.status({
 										fill: 'red',
 										shape: 'ring',
-										text: RED._('rocketchat-in.errors.error-processing', error)
+										text: RED._('rocketchat-in.errors.error-processing', error),
 									});
 								} else {
 									subscribeMessages();
@@ -187,11 +195,11 @@ module.exports = function(RED) {
 									const [message] = args;
 									const {
 										rid,
-										u: { _id: fromUser }
+										u: { _id: fromUser },
 									} = message;
 									if (fromUser !== user) {
 										node.send({
-											payload: message
+											payload: message,
 										});
 									}
 									apiInstance.markAsRead({ rid });
@@ -207,7 +215,7 @@ module.exports = function(RED) {
 				node.status({
 					fill: 'red',
 					shape: 'ring',
-					text: RED._('rocketchat-in.errors.error-processing', error)
+					text: RED._('rocketchat-in.errors.error-processing', error),
 				});
 			}
 		};

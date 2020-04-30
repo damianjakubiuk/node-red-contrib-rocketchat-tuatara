@@ -10,7 +10,8 @@
 		},
 		"types": {
 			"channel": "Public Channel",
-			"group": "Private Group"
+			"group": "Private Group",
+			"live": "Live-chat Channel"
 		},
 		"errors": {
 			"invalid-data": "Input data is missing",

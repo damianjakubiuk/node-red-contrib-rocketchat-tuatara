@@ -35,17 +35,17 @@
 			origin: { value: 'user' },
 			room: { value: '' },
 			roomType: { value: 'form' },
-			roomData: { value: '' }
+			roomData: { value: '' },
 		},
 		inputs: 0,
 		outputs: 1,
 		icon: 'rocketchat.png',
-		label: function() {
+		label: function () {
 			return this.name || 'Rocket.Chat Receiver';
 		},
-		oneditprepare: function() {
+		oneditprepare: function () {
 			const node = this;
-			$('#node-input-server').change(function() {
+			$('#node-input-server').change(function () {
 				const server = $(this).val();
 				if (server === '_ADD_') {
 					$('.server-dependent').hide();
@@ -53,7 +53,7 @@
 					$('.server-dependent').show();
 				}
 			});
-			$('#node-input-origin').change(function() {
+			$('#node-input-origin').change(function () {
 				const origin = $(this).val();
 				if (origin === 'room') {
 					$('#row-room').show();
@@ -72,11 +72,11 @@
 						{
 							value: 'form',
 							label: node._('rocketchat-in.label.autocomplete'),
-							hasValue: false
-						}
-					]
+							hasValue: false,
+						},
+					],
 				})
-				.change(function() {
+				.change(function () {
 					var type = $(this).typedInput('type');
 					if (type === 'form') {
 						$('#room-autocomplete-row').show();
@@ -87,26 +87,26 @@
 				});
 
 			$('#node-input-room-autocomplete').autocomplete({
-				source: function(request, response) {
+				source: function (request, response) {
 					const server = $('#node-input-server').val();
 					$.ajax({
 						url: 'rocketchat-server/' + server + '/spotlight/' + request.term,
 						type: 'GET',
 						dataType: 'json',
-						success: options => {
+						success: (options) => {
 							return response(
-								(options.rooms || []).map(opt => ({
+								(options.rooms || []).map((opt) => ({
 									id: opt._id,
-									value: opt.name
+									value: opt.name,
 								}))
 							);
-						}
+						},
 					});
 				},
 				minLength: 2,
-				select: function(event, ui) {
+				select: function (event, ui) {
 					$('#node-input-room-autocomplete-id').val(ui.item.id);
-				}
+				},
 			});
 			if (node.roomType === 'form') {
 				const { i, l } = JSON.parse(node.roomData);
@@ -114,17 +114,17 @@
 				$('#node-input-room-autocomplete-id').val(i);
 			}
 		},
-		oneditsave: function() {
+		oneditsave: function () {
 			const node = this;
 			node.roomType = $('#node-input-room').typedInput('type');
 			if (node.roomType === 'form') {
 				node.roomData = JSON.stringify({
 					i: $('#node-input-room-autocomplete-id').val(),
-					l: $('#node-input-room-autocomplete').val()
+					l: $('#node-input-room-autocomplete').val(),
 				});
 			} else {
 				node.roomData = '{}';
 			}
-		}
+		},
 	});
 </script>

@@ -1,6 +1,6 @@
 const api = require('./rocketchat');
 
-module.exports = function(RED) {
+module.exports = function (RED) {
 	'use strict';
 
 	function RocketChatCreate(config) {
@@ -8,8 +8,9 @@ module.exports = function(RED) {
 		const node = this;
 		node.server = RED.nodes.getNode(config.server);
 
-		node.on('input', async function(msg) {
+		node.on('input', async function (msg) {
 			const { host, user, token } = node.server;
+			const livetChatConfig = msg.livetChatConfig;
 			const { roomType, roomName, roomNameType, users, usersType, readOnly } = config;
 
 			const apiInstance = api({ host, user, token });
@@ -23,7 +24,7 @@ module.exports = function(RED) {
 				if (success) {
 					node.send({
 						...msg,
-						payload
+						payload,
 					});
 					node.status({});
 				} else {
@@ -31,27 +32,52 @@ module.exports = function(RED) {
 					node.status({
 						fill: 'red',
 						shape: 'ring',
-						text: RED._('rocketchat-create.errors.error-processing', errors)
+						text: RED._('rocketchat-create.errors.error-processing', errors),
 					});
 				}
 			};
 
 			node.status({ fill: 'blue', shape: 'dot', text: 'rocketchat-create.label.sending' });
 			try {
-				if (roomType === 'channel') {
-					const { success, channel, errors } = await apiInstance.createChannel({ name, members, readOnly });
-					processResponse(success, channel, errors);
-				}
-				if (roomType === 'group') {
-					const { success, group, errors } = await apiInstance.createGroup({ name, members, readOnly });
-					processResponse(success, group, errors);
+				switch (roomType) {
+					case 'channel': {
+						const { success, channel, errors } = await apiInstance.createChannel({
+							name,
+							members,
+							readOnly,
+						});
+						processResponse(success, channel, errors);
+						break;
+					}
+					case 'group': {
+						const { success, group, errors } = await apiInstance.createGroup({ name, members, readOnly });
+						processResponse(success, group, errors);
+						break;
+					}
+					case 'live': {
+						await apiInstance.createLiveChatVisitor({
+							name: livetChatConfig.name,
+							email: livetChatConfig.email,
+							token: livetChatConfig.token,
+						});
+						const { success, config } = await apiInstance.getLiveChatConfig({
+							token: livetChatConfig.token,
+						});
+						const { room } = await apiInstance.createLiveChatRoom({ token: livetChatConfig.token });
+						config.room_id = room._id;
+						processResponse(success, config);
+						break;
+					}
+
+					default:
+						throw new Error('Invalid roomType');
 				}
 			} catch (error) {
 				node.error(RED._('rocketchat-create.errors.error-processing', error));
 				node.status({
 					fill: 'red',
 					shape: 'ring',
-					text: RED._('rocketchat-create.errors.error-processing', error)
+					text: RED._('rocketchat-create.errors.error-processing', error),
 				});
 			}
 		});

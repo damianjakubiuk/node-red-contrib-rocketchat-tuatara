@@ -1,6 +1,6 @@
 const api = require('./rocketchat');
 
-module.exports = function(RED) {
+module.exports = function (RED) {
 	'use strict';
 
 	function RocketChatOut(config) {
@@ -21,10 +21,10 @@ module.exports = function(RED) {
 			attachmentsType,
 			room,
 			roomType,
-			roomData
+			roomData,
 		} = config;
 
-		node.on('input', async function(msg) {
+		node.on('input', async function (msg) {
 			const { host, user, token } = node.server;
 
 			const apiInstance = api({ host, user, token });
@@ -61,7 +61,7 @@ module.exports = function(RED) {
 						node.status({
 							fill: 'red',
 							shape: 'ring',
-							text: RED._('rocketchat-out.errors.error-processing', errors)
+							text: RED._('rocketchat-out.errors.error-processing', errors),
 						});
 					}
 				} catch (error) {
@@ -69,7 +69,7 @@ module.exports = function(RED) {
 					node.status({
 						fill: 'red',
 						shape: 'ring',
-						text: RED._('rocketchat-out.errors.error-processing', error)
+						text: RED._('rocketchat-out.errors.error-processing', error),
 					});
 				}
 			}
@@ -82,14 +82,14 @@ module.exports = function(RED) {
 					attachments,
 					alias,
 					avatar,
-					emoji
+					emoji,
 				});
 			} catch (error) {
 				node.error(RED._('rocketchat-out.errors.error-processing', error));
 				node.status({
 					fill: 'red',
 					shape: 'ring',
-					text: RED._('rocketchat-out.errors.error-processing', error)
+					text: RED._('rocketchat-out.errors.error-processing', error),
 				});
 			}
 			node.status({});

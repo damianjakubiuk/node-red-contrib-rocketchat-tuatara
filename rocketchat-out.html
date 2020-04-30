@@ -66,18 +66,18 @@
 			messageText: { value: '', validate: RED.validators.typedInput('messageTextType') },
 			messageTextType: { value: 'str' },
 			attachments: { value: '[]', validate: RED.validators.typedInput('attachmentsType') },
-			attachmentsType: { value: 'json' }
+			attachmentsType: { value: 'json' },
 		},
 		inputs: 1,
 		outputs: 0,
 		icon: 'rocketchat.png',
 		align: 'right',
-		label: function() {
+		label: function () {
 			return this.name || 'Rocket․Chat Sender';
 		},
-		oneditprepare: function() {
+		oneditprepare: function () {
 			const node = this;
-			$('#node-input-server').change(function() {
+			$('#node-input-server').change(function () {
 				const server = $(this).val();
 				if (server === '_ADD_') {
 					$('.server-dependent').hide();
@@ -96,11 +96,11 @@
 						{
 							value: 'form',
 							label: node._('rocketchat-out.label.autocomplete'),
-							hasValue: false
-						}
-					]
+							hasValue: false,
+						},
+					],
 				})
-				.change(function() {
+				.change(function () {
 					var type = $(this).typedInput('type');
 					if (type === 'form') {
 						$('#room-autocomplete-row').show();
@@ -111,37 +111,37 @@
 				});
 
 			$('#node-input-room-autocomplete').autocomplete({
-				source: function(request, response) {
+				source: function (request, response) {
 					const server = $('#node-input-server').val();
 					$.ajax({
 						url: 'rocketchat-server/' + server + '/spotlight/' + request.term,
 						type: 'GET',
 						dataType: 'json',
-						success: options => {
+						success: (options) => {
 							const destination = $('#node-input-destination').val() || 'users';
 							return response(
-								(options[destination] || []).map(opt => ({
+								(options[destination] || []).map((opt) => ({
 									id: destination === 'users' ? opt.username : opt._id,
-									value: opt.name
+									value: opt.name,
 								}))
 							);
-						}
+						},
 					});
 				},
 				minLength: 2,
-				select: function(event, ui) {
+				select: function (event, ui) {
 					$('#node-input-room-autocomplete-id').val(ui.item.id);
-				}
+				},
 			});
 
 			$('#node-input-messageText').typedInput({
 				default: node.messageTextType || 'str',
-				types: ['msg', 'flow', 'global', 'env', 'str']
+				types: ['msg', 'flow', 'global', 'env', 'str'],
 			});
 
 			$('#node-input-attachments').typedInput({
 				default: node.attachmentsType || 'json',
-				types: ['msg', 'flow', 'global', 'env', 'json']
+				types: ['msg', 'flow', 'global', 'env', 'json'],
 			});
 
 			$('#node-input-messageText').typedInput('value', node.messageText);
@@ -161,7 +161,7 @@
 				$('#node-input-room-autocomplete-id').val(i);
 			}
 		},
-		oneditsave: function() {
+		oneditsave: function () {
 			const node = this;
 			node.roomType = $('#node-input-room').typedInput('type');
 			node.messageTextType = $('#node-input-messageText').typedInput('type');
@@ -172,11 +172,11 @@
 			if (node.roomType === 'form') {
 				node.roomData = JSON.stringify({
 					i: $('#node-input-room-autocomplete-id').val(),
-					l: $('#node-input-room-autocomplete').val()
+					l: $('#node-input-room-autocomplete').val(),
 				});
 			} else {
 				node.roomData = '{}';
 			}
-		}
+		},
 	});
 </script>
