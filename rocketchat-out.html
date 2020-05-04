@@ -44,7 +44,7 @@
 		<label for="node-input-attachments"><i class="fa fa-paperclip"></i> <span data-i18n="rocketchat-out.label.attachments"></span></label>
 		<input type="text" id="node-input-attachments" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.attachments">
 	</div>
-	<div class="form-row">
+	<div class="form-row server-dependent">
 		<label for="node-input-liveChatTokenConfig">
 			<i class="fa fa-tag"></i>
 			<span data-i18n="rocketchat-out.label.liveChatTokenConfig"></span>
@@ -158,6 +158,11 @@
 				types: ['msg', 'flow', 'global', 'env', 'json'],
 			});
 
+			$('#node-input-liveChatTokenConfig').typedInput({
+				default: node.liveChatTokenConfigType || 'str',
+				types: ['msg', 'flow', 'global', 'env', 'str'],
+			});
+
 			$('#node-input-messageText').typedInput('value', node.messageText);
 			$('#node-input-messageText').typedInput('type', node.messageTextType);
 			$('#node-input-aliasText').typedInput('value', node.aliasText);
@@ -168,15 +173,8 @@
 			$('#node-input-emojiText').typedInput('type', node.emojiTextType);
 			$('#node-input-attachments').typedInput('value', node.attachments);
 			$('#node-input-attachments').typedInput('type', node.attachmentsType);
-
-			$('#node-input-liveChatTokenConfig').typedInput({
-				default: node.liveChatTokenConfigType || 'str',
-				types: ['msg', 'flow', 'global', 'env', 'str'],
-			});
-
-			if (node.liveChatTokenConfig != null) {
-				$('#node-input-liveChatTokenConfig').typedInput('value', node.liveChatTokenConfig);
-			}
+			$('#node-input-liveChatTokenConfig').typedInput('value', node.liveChatTokenConfig);
+			$('#node-input-liveChatTokenConfig').typedInput('type', node.liveChatTokenConfigType);
 
 			if (node.roomType === 'form') {
 				const { i, l } = JSON.parse(node.roomData);
