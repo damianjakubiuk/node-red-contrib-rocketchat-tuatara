@@ -74,10 +74,14 @@ module.exports = function (RED) {
 						break;
 					}
 					case 'live': {
-						const { room } = await apiInstance.createLiveChatRoom({
-							token: roomId,
-						});
-						await apiInstance.liveChatSend({ token: roomId, text, rid: room._id });
+						try {
+							const { room } = await apiInstance.createLiveChatRoom({
+								token: roomId,
+							});
+							await apiInstance.liveChatSend({ token: roomId, text, rid: room._id });
+						} catch (error) {
+							throw new Error(roomId + ':' + room._id + ':' + error);
+						}
 						break;
 					}
 					default:
@@ -85,7 +89,7 @@ module.exports = function (RED) {
 				}
 				node.status({});
 			} catch (error) {
-				node.error(error);
+				node.error(config.destination + error);
 				node.status({
 					fill: 'red',
 					shape: 'ring',
