@@ -22,6 +22,8 @@ module.exports = function (RED) {
 			room,
 			roomType,
 			roomData,
+			liveChatTokenConfig,
+			liveChatTokenConfigType,
 		} = config;
 
 		node.on('input', async function (msg) {
@@ -42,48 +44,53 @@ module.exports = function (RED) {
 			const emoji = RED.util.evaluateNodeProperty(emojiText, emojiTextType, this, msg);
 			const text = RED.util.evaluateNodeProperty(messageText, messageTextType, this, msg);
 			const attachments = RED.util.evaluateNodeProperty(configAttachments, attachmentsType, this, msg);
-
+			const liveChatToken = RED.util.evaluateNodeProperty(
+				liveChatTokenConfig,
+				liveChatTokenConfigType,
+				this,
+				msg
+			);
 			if (roomId == null) {
 				node.warn(RED._('rocketchat-out.errors.invalid-data'));
 				node.status({ fill: 'red', shape: 'ring', text: 'rocketchat-out.errors.invalid-data' });
 				return;
 			}
 
-			if (config.destination === 'users') {
-				node.status({ fill: 'blue', shape: 'dot', text: 'rocketchat-out.label.sending' });
-				try {
-					const { success, room, errors } = await apiInstance.createIM({ username: roomId });
-					if (success) {
-						const { _id } = room;
-						roomId = _id;
-					} else {
-						node.error(RED._('rocketchat-out.errors.error-processing', errors));
-						node.status({
-							fill: 'red',
-							shape: 'ring',
-							text: RED._('rocketchat-out.errors.error-processing', errors),
-						});
-					}
-				} catch (error) {
-					node.error(RED._('rocketchat-out.errors.error-processing', error));
-					node.status({
-						fill: 'red',
-						shape: 'ring',
-						text: RED._('rocketchat-out.errors.error-processing', error),
-					});
-				}
-			}
-
 			node.status({ fill: 'blue', shape: 'dot', text: 'rocketchat-out.label.sending' });
 			try {
-				await apiInstance.send({
-					roomId,
-					text,
-					attachments,
-					alias,
-					avatar,
-					emoji,
-				});
+				switch (config.destination) {
+					case 'users': {
+						const { success, room, errors } = await apiInstance.createIM({ username: roomId });
+						if (success) {
+							const { _id } = room;
+							roomId = _id;
+						} else {
+							throw new Error(errors);
+						}
+						break;
+					}
+					case 'rooms': {
+						await apiInstance.send({
+							roomId,
+							text,
+							attachments,
+							alias,
+							avatar,
+							emoji,
+						});
+						break;
+					}
+					case 'live': {
+						const { room } = await apiInstance.createLiveChatRoom({
+							token: liveChatToken,
+						});
+						await apiInstance.liveChatSend({ token: liveChatToken, text, rid: room._id });
+						break;
+					}
+					default:
+						throw new Error('Invalid destination');
+				}
+				node.status({});
 			} catch (error) {
 				node.error(RED._('rocketchat-out.errors.error-processing', error));
 				node.status({
@@ -92,7 +99,6 @@ module.exports = function (RED) {
 					text: RED._('rocketchat-out.errors.error-processing', error),
 				});
 			}
-			node.status({});
 		});
 	}
 

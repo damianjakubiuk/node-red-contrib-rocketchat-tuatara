@@ -12,6 +12,7 @@
 		<select id="node-input-destination" style="width: 70%">
 			<option value="users" data-i18n="rocketchat-out.destinations.users"></option>
 			<option value="rooms" data-i18n="rocketchat-out.destinations.rooms"></option>
+			<option value="live" data-i18n="rocketchat-out.destinations.live"></option>
 		</select>
 	</div>
 	<div class="form-row server-dependent">
@@ -43,6 +44,13 @@
 		<label for="node-input-attachments"><i class="fa fa-paperclip"></i> <span data-i18n="rocketchat-out.label.attachments"></span></label>
 		<input type="text" id="node-input-attachments" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.attachments">
 	</div>
+	<div class="form-row">
+		<label for="node-input-liveChatTokenConfig">
+			<i class="fa fa-tag"></i>
+			<span data-i18n="rocketchat-out.label.liveChatTokenConfig"></span>
+		</label>
+		<input type="text" id="node-input-liveChatTokenConfig" style="width: 70%" data-i18n="[placeholder]rocketchat-out.label.liveChatTokenConfig">
+	</div>
 </script>
 
 <script type="text/javascript">
@@ -67,6 +75,12 @@
 			messageTextType: { value: 'str' },
 			attachments: { value: '[]', validate: RED.validators.typedInput('attachmentsType') },
 			attachmentsType: { value: 'json' },
+			liveChatTokenConfig: {
+				value: '',
+				required: false,
+				validate: RED.validators.typedInput('liveChatTokenConfigType'),
+			},
+			liveChatTokenConfigType: { value: 'str' },
 		},
 		inputs: 1,
 		outputs: 0,
@@ -155,6 +169,11 @@
 			$('#node-input-attachments').typedInput('value', node.attachments);
 			$('#node-input-attachments').typedInput('type', node.attachmentsType);
 
+			$('#node-input-liveChatTokenConfig').typedInput({
+				default: node.liveChatTokenConfigType || 'str',
+				types: ['msg', 'flow', 'global', 'env', 'str'],
+			});
+
 			if (node.roomType === 'form') {
 				const { i, l } = JSON.parse(node.roomData);
 				$('#node-input-room-autocomplete').val(l);
@@ -177,6 +196,7 @@
 			} else {
 				node.roomData = '{}';
 			}
+			node.liveChatTokenConfigType = $('#node-input-liveChatTokenConfig').typedInput('type');
 		},
 	});
 </script>

@@ -145,4 +145,8 @@ module.exports = ({ host, user, token }) => ({
 		const { data } = await axios.get(`${host}/api/v1/livechat/room?token=${token}`);
 		return data;
 	},
+	async liveChatSend({ token, text, rid }) {
+		const { data } = await axios.post(`${host}/api/v1/livechat/message`, { msg: text, token, rid });
+		return data;
+	},
 });
