@@ -22,6 +22,8 @@ module.exports = function (RED) {
 			room,
 			roomType,
 			roomData,
+			liveChatTokenConfig,
+			liveChatTokenConfigType,
 		} = config;
 
 		node.on('input', async function (msg) {
@@ -42,7 +44,12 @@ module.exports = function (RED) {
 			const emoji = RED.util.evaluateNodeProperty(emojiText, emojiTextType, this, msg);
 			const text = RED.util.evaluateNodeProperty(messageText, messageTextType, this, msg);
 			const attachments = RED.util.evaluateNodeProperty(configAttachments, attachmentsType, this, msg);
-
+			const liveChatToken = RED.util.evaluateNodeProperty(
+				liveChatTokenConfig,
+				liveChatTokenConfigType,
+				this,
+				msg
+			);
 			if (roomId == null) {
 				node.warn(RED._('rocketchat-out.errors.invalid-data'));
 				node.status({ fill: 'red', shape: 'ring', text: 'rocketchat-out.errors.invalid-data' });
@@ -75,10 +82,11 @@ module.exports = function (RED) {
 					}
 					case 'live': {
 						try {
-							const { room } = await apiInstance.createLiveChatRoom({
-								token: roomId,
+							const response = await apiInstance.liveChatSend({
+								token: liveChatToken,
+								text,
+								rid: roomId,
 							});
-							const response = await apiInstance.liveChatSend({ token: roomId, text, rid: room._id });
 							node.send({ ...msg, response });
 						} catch (error) {
 							throw new Error(roomId + ':' + room._id + ':' + error);
