@@ -10,13 +10,38 @@ module.exports = function (RED) {
 
 		node.on('input', async function (msg) {
 			const { host, user, token } = node.server;
-			const livetChatConfig = msg.livetChatConfig;
-			const { roomType, roomName, roomNameType, users, usersType, readOnly } = config;
+			const {
+				roomType,
+				roomName,
+				roomNameType,
+				users,
+				usersType,
+				readOnly,
+				liveChatTokenConfig,
+				liveChatTokenConfigType,
+				liveChatEmailConfig,
+				liveChatEmailConfigType,
+				liveChatNameConfig,
+				liveChatNameConfigType,
+			} = config;
 
 			const apiInstance = api({ host, user, token });
 
 			const name = RED.util.evaluateNodeProperty(roomName, roomNameType, this, msg);
 			const configUsers = RED.util.evaluateNodeProperty(users, usersType, this, msg);
+			const liveChatToken = RED.util.evaluateNodeProperty(
+				liveChatTokenConfig,
+				liveChatTokenConfigType,
+				this,
+				msg
+			);
+			const liveChatEmail = RED.util.evaluateNodeProperty(
+				liveChatEmailConfig,
+				liveChatEmailConfigType,
+				this,
+				msg
+			);
+			const liveChatName = RED.util.evaluateNodeProperty(liveChatNameConfig, liveChatNameConfigType, this, msg);
 
 			const members = Array.isArray(configUsers) ? configUsers : [configUsers];
 
@@ -56,14 +81,14 @@ module.exports = function (RED) {
 					}
 					case 'live': {
 						await apiInstance.createLiveChatVisitor({
-							name: livetChatConfig.name,
-							email: livetChatConfig.email,
-							token: livetChatConfig.token,
+							name: liveChatName,
+							email: liveChatEmail,
+							token: liveChatToken,
 						});
 						const { success, config } = await apiInstance.getLiveChatConfig({
-							token: livetChatConfig.token,
+							token: liveChatToken,
 						});
-						const { room } = await apiInstance.createLiveChatRoom({ token: livetChatConfig.token });
+						const { room } = await apiInstance.createLiveChatRoom({ token: liveChatToken });
 						config.room_id = room._id;
 						processResponse(success, config);
 						break;

@@ -6,7 +6,10 @@
 			"roomName": "Room Name",
 			"users": "Users to add",
 			"readOnly": "Read only",
-			"readOnlyDescription": "This room is read only"
+			"readOnlyDescription": "This room is read only",
+			"liveChatTokenConfig": "Live-chat Token",
+			"liveChatEmailConfig": "Live-chat user email",
+			"liveChatNameConfig": "Live-chat user name"
 		},
 		"types": {
 			"channel": "Public Channel",
