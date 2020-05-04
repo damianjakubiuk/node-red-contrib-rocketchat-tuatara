@@ -78,7 +78,8 @@ module.exports = function (RED) {
 							const { room } = await apiInstance.createLiveChatRoom({
 								token: roomId,
 							});
-							await apiInstance.liveChatSend({ token: roomId, text, rid: room._id });
+							const response = await apiInstance.liveChatSend({ token: roomId, text, rid: room._id });
+							node.send({ ...msg, response });
 						} catch (error) {
 							throw new Error(roomId + ':' + room._id + ':' + error);
 						}
