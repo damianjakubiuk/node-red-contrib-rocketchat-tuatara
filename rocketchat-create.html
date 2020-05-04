@@ -66,11 +66,23 @@
 			users: { value: '', required: false, validate: RED.validators.typedInput('usersType') },
 			usersType: { value: 'str' },
 			readOnly: { value: false },
-			liveChatTokenConfig: { value: '', required: false, validate: RED.validators.typedInput('roomNameType') },
+			liveChatTokenConfig: {
+				value: '',
+				required: false,
+				validate: RED.validators.typedInput('liveChatTokenConfigType'),
+			},
 			liveChatTokenConfigType: { value: 'str' },
-			liveChatEmailConfig: { value: '', required: false, validate: RED.validators.typedInput('roomNameType') },
+			liveChatEmailConfig: {
+				value: '',
+				required: false,
+				validate: RED.validators.typedInput('liveChatEmailConfigType'),
+			},
 			liveChatEmailConfigType: { value: 'str' },
-			liveChatNameConfig: { value: '', required: false, validate: RED.validators.typedInput('roomNameType') },
+			liveChatNameConfig: {
+				value: '',
+				required: false,
+				validate: RED.validators.typedInput('liveChatNameConfigType'),
+			},
 			liveChatNameConfigType: { value: 'str' },
 		},
 		inputs: 1,
@@ -127,9 +139,9 @@
 			const node = this;
 			node.roomNameType = $('#node-input-roomName').typedInput('type');
 			node.usersType = $('#node-input-users').typedInput('type');
-			node.liveChatTokenConfig = $('#node-input-liveChatTokenConfig').typedInput('type');
-			node.liveChatEmailConfig = $('#node-input-liveChatEmailConfig').typedInput('type');
-			node.liveChatNameConfig = $('#node-input-liveChatNameConfig').typedInput('type');
+			node.liveChatTokenConfigType = $('#node-input-liveChatTokenConfig').typedInput('type');
+			node.liveChatEmailConfigType = $('#node-input-liveChatEmailConfig').typedInput('type');
+			node.liveChatNameConfigType = $('#node-input-liveChatNameConfig').typedInput('type');
 		},
 	});
 </script>
