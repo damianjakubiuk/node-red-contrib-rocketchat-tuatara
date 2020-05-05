@@ -1,26 +1,37 @@
 <script type="text/x-red" data-template-name="rocketchat-in">
 	<div class="form-row">
-	  <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="rocketchat-in.label.name"></span></label>
-	  <input type="text" id="node-input-name" placeholder="Name">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="rocketchat-in.label.name"></span></label>
+		<input type="text" id="node-input-name" placeholder="Name">
 	</div>
 	<div class="form-row">
-	  <label for="node-input-server"><i class="fa fa-tasks"></i> <span data-i18n="rocketchat-in.label.server"></span></label>
-	  <input type="text" id="node-input-server" data-i18n="[placeholder]rocketchat-in.label.server">
+		<label for="node-input-server"><i class="fa fa-tasks"></i> <span data-i18n="rocketchat-in.label.server"></span></label>
+		<input type="text" id="node-input-server" data-i18n="[placeholder]rocketchat-in.label.server">
 	</div>
 	<div class="form-row server-dependent">
 		<label for="node-input-origin"><i class="fa fa-inbox"></i> <span data-i18n="rocketchat-in.label.origin"></span></label>
 		<select id="node-input-origin" style="width: 70%">
 			<option value="user" data-i18n="rocketchat-in.origins.user"></option>
 			<option value="room" data-i18n="rocketchat-in.origins.room"></option>
+			<option value="live" data-i18n="rocketchat-in.origins.live"></option>
 		</select>
 	</div>
 	<div id="row-room" class="form-row" style="display: none;">
-		<label for="node-input-room"><i class="fa fa-hashtag"></i>  <span data-i18n="rocketchat-in.label.room"></span></label>
+		<label for="node-input-room">
+			<i class="fa fa-hashtag"></i>
+			<span data-i18n="rocketchat-in.label.room"></span>
+		</label>
 		<input type="text" style="width: 70%;" id="node-input-room" data-i18n="[placeholder]rocketchat-in.label.room">
 		<div id="room-autocomplete-row" class="form-row" style="margin-top: 5px; margin-left: 104px;width: 70%;display:none;">
 			<input type="text" style="width: 100%;" id="node-input-room-autocomplete" data-i18n="[placeholder]rocketchat-in.label.autocomplete">
 			<input type="hidden" id="node-input-room-autocomplete-id">
 		</div>
+	</div>
+	<div id="row-live-token" class="form-row server-dependent" style="display: none;">
+		<label for="node-input-liveChatTokenConfig">
+			<i class="fa fa-commenting-o"></i>
+			<span data-i18n="rocketchat-out.label.liveChatTokenConfig"></span>
+		</label>
+		<input type="text" id="node-input-liveChatTokenConfig" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.liveChatTokenConfig">
 	</div>
 </script>
 
@@ -36,8 +47,10 @@
 			room: { value: '' },
 			roomType: { value: 'form' },
 			roomData: { value: '' },
+			liveChatTokenConfig: { value: '', validate: RED.validators.typedInput('liveChatTokenConfigType') },
+			liveChatTokenConfigType: { value: 'str' },
 		},
-		inputs: 0,
+		inputs: 1,
 		outputs: 1,
 		icon: 'rocketchat.png',
 		label: function () {
@@ -55,10 +68,20 @@
 			});
 			$('#node-input-origin').change(function () {
 				const origin = $(this).val();
-				if (origin === 'room') {
-					$('#row-room').show();
-				} else {
-					$('#row-room').hide();
+				$('#row-room').hide();
+				$('#row-live-token').hide();
+				switch (origin) {
+					case 'user':
+						break;
+					case 'room':
+						$('#row-room').show();
+						break;
+					case 'live':
+						$('#row-room').show();
+						$('#row-live-token').show();
+						break;
+					default:
+						break;
 				}
 			});
 			$('#node-input-room')
@@ -85,6 +108,13 @@
 						$('#room-autocomplete-row').hide();
 					}
 				});
+
+			$('#node-input-liveChatTokenConfig').typedInput({
+				default: node.liveChatTokenConfigType || 'str',
+				types: ['msg', 'flow', 'global', 'env', 'str'],
+			});
+			$('#node-input-liveChatTokenConfig').typedInput('value', node.liveChatTokenConfig);
+			$('#node-input-liveChatTokenConfig').typedInput('type', node.liveChatTokenConfigType);
 
 			$('#node-input-room-autocomplete').autocomplete({
 				source: function (request, response) {
@@ -116,6 +146,7 @@
 		},
 		oneditsave: function () {
 			const node = this;
+			node.liveChatTokenConfigType = $('#node-input-liveChatTokenConfig').typedInput('type');
 			node.roomType = $('#node-input-room').typedInput('type');
 			if (node.roomType === 'form') {
 				node.roomData = JSON.stringify({
