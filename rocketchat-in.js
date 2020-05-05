@@ -254,6 +254,11 @@ module.exports = function (RED) {
 											if (message.token !== liveChatToken) {
 												node.send({
 													payload: message,
+													websocket_session_id: liveChatToken,
+													_session: {
+														type: 'websocket',
+														id: liveChatToken,
+													},
 												});
 												apiInstance.markAsRead({ rid });
 											}
