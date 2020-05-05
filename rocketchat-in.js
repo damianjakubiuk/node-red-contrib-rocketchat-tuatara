@@ -117,7 +117,7 @@ module.exports = function (RED) {
 					let ws = new WebSocket(endpoint);
 
 					const wsSend = (message) => {
-						node.send(message);
+						node.send({ sent: message });
 						ws.send(EJSON.stringify(message));
 					};
 
@@ -142,12 +142,29 @@ module.exports = function (RED) {
 					};
 
 					const subscribeMessages = () => {
-						wsSend({
-							msg: 'sub',
-							id: '2',
-							name: 'stream-room-messages',
-							params: [roomId, true],
-						});
+						let subMessage;
+						if (origin === 'live') {
+							subMessage = {
+								msg: 'sub',
+								name: 'stream-room-messages',
+								params: [
+									roomId,
+									{
+										useCollection: false,
+										args: [{ token: liveChatToken, visitorToken: liveChatToken }],
+									},
+								],
+								id: 'ddp-2',
+							};
+						} else {
+							subMessage = {
+								msg: 'sub',
+								id: '2',
+								name: 'stream-room-messages',
+								params: [roomId, true],
+							};
+						}
+						wsSend(subMessage);
 					};
 
 					const heartbeat = () => {
@@ -160,11 +177,21 @@ module.exports = function (RED) {
 
 					ws.on('open', () => {
 						heartbeat();
-						wsSend({
-							msg: 'connect',
-							version: '1',
-							support: ['1'],
-						});
+						let openMessage;
+						if (origin === 'live') {
+							openMessage = {
+								msg: 'connect',
+								version: '1',
+								support: ['1', 'pre2', 'pre1'],
+							};
+						} else {
+							openMessage = {
+								msg: 'connect',
+								version: '1',
+								support: ['1'],
+							};
+						}
+						wsSend(openMessage);
 					});
 
 					ws.on('close', () => {
@@ -181,7 +208,7 @@ module.exports = function (RED) {
 					ws.on('message', (data) => {
 						const parsed = EJSON.parse(data);
 						const { id, msg, error, fields } = parsed;
-						node.send(parsed);
+						node.send({ received: parsed });
 
 						switch (msg) {
 							case 'connected':
