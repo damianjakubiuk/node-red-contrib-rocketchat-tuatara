@@ -10,10 +10,10 @@ module.exports = function (RED) {
 		RED.nodes.createNode(this, config);
 		const node = this;
 
-		const { server, origin, room, roomType, roomData } = config;
-		node.server = RED.nodes.getNode(server);
+		node.server = RED.nodes.getNode(config.server);
 
 		node.on('input', async function (msg) {
+			const { origin, room, roomType, roomData, liveChatTokenConfig, liveChatTokenConfigType } = config;
 			if (node.server == null) {
 				node.status({ fill: 'red', shape: 'ring', text: 'rocketchat-in.errors.invalid-data' });
 				return;
@@ -38,7 +38,12 @@ module.exports = function (RED) {
 					roomId = RED.util.evaluateNodeProperty(room, roomType, this, msg);
 				}
 			}
-
+			const liveChatToken = RED.util.evaluateNodeProperty(
+				liveChatTokenConfig,
+				liveChatTokenConfigType,
+				this,
+				msg
+			);
 			const apiInstance = api({ host: configHost, user, token });
 
 			const processUnreadMessages = async () => {
@@ -112,6 +117,7 @@ module.exports = function (RED) {
 					let ws = new WebSocket(endpoint);
 
 					const wsSend = (message) => {
+						node.send(message);
 						ws.send(EJSON.stringify(message));
 					};
 
@@ -121,7 +127,7 @@ module.exports = function (RED) {
 							loginMessage = {
 								msg: 'method',
 								method: 'livechat:setUpConnection',
-								params: [{ token: 'wb7yeib6lumirj0fyte72' }],
+								params: [{ token: liveChatToken }],
 								id: 'ddp-1',
 							};
 						} else {
