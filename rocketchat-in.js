@@ -117,7 +117,6 @@ module.exports = function (RED) {
 					let ws = new WebSocket(endpoint);
 
 					const wsSend = (message) => {
-						node.send({ sent: message });
 						ws.send(EJSON.stringify(message));
 					};
 
@@ -218,7 +217,6 @@ module.exports = function (RED) {
 					ws.on('message', (data) => {
 						const parsed = EJSON.parse(data);
 						const { id, msg, error, fields } = parsed;
-						node.send({ received: parsed });
 
 						switch (msg) {
 							case 'connected':
@@ -252,12 +250,21 @@ module.exports = function (RED) {
 											rid,
 											u: { _id: fromUser },
 										} = message;
-										if (fromUser !== user) {
-											node.send({
-												payload: message,
-											});
+										if (origin === 'live') {
+											if (message.token !== liveChatToken) {
+												node.send({
+													payload: message,
+												});
+												apiInstance.markAsRead({ rid });
+											}
+										} else {
+											if (fromUser !== user) {
+												node.send({
+													payload: message,
+												});
+											}
+											apiInstance.markAsRead({ rid });
 										}
-										apiInstance.markAsRead({ rid });
 									}
 								}
 								break;
@@ -276,7 +283,6 @@ module.exports = function (RED) {
 			};
 
 			startListening();
-			node.send(msg);
 		});
 	}
 
