@@ -5,12 +5,14 @@
 			"server": "Server",
 			"origin": "Origin type",
 			"room": "Room",
+			"liveChatTokenConfig": "Live-chat Token",
 			"autocomplete": "Find",
 			"receiving": "Receiving..."
 		},
 		"origins": {
 			"user": "User",
-			"room": "Room"
+			"room": "Room",
+			"live": "Live-chat"
 		},
 		"errors": {
 			"invalid-data": "Input data is missing",
