@@ -142,9 +142,8 @@ module.exports = function (RED) {
 					};
 
 					const subscribeMessages = () => {
-						let subMessage;
 						if (origin === 'live') {
-							subMessage = {
+							wsSend({
 								msg: 'sub',
 								name: 'stream-room-messages',
 								params: [
@@ -155,16 +154,27 @@ module.exports = function (RED) {
 									},
 								],
 								id: 'ddp-2',
-							};
+							});
+							wsSend({
+								msg: 'sub',
+								name: 'stream-livechat-room',
+								params: [
+									roomId,
+									{
+										useCollection: false,
+										args: [{ token: liveChatToken, visitorToken: liveChatToken }],
+									},
+								],
+								id: 'ddp-3',
+							});
 						} else {
-							subMessage = {
+							wsSend({
 								msg: 'sub',
 								id: '2',
 								name: 'stream-room-messages',
 								params: [roomId, true],
-							};
+							});
 						}
-						wsSend(subMessage);
 					};
 
 					const heartbeat = () => {
@@ -219,7 +229,7 @@ module.exports = function (RED) {
 								heartbeat();
 								break;
 							case 'result':
-								if (id === '1') {
+								if (id === '1' || id === 'ddp-1') {
 									// Login
 									if (error != null) {
 										node.error(RED._('rocketchat-in.errors.error-processing', error));
