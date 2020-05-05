@@ -28,15 +28,15 @@ module.exports = function (RED) {
 			const endpoint = `${useSsl ? 'wss://' : 'ws://'}${host}/websocket`;
 
 			let roomId;
-			if (origin === 'room') {
+			if (origin === 'user') {
+				roomId = '__my_messages__';
+			} else {
 				if (roomType === 'form') {
 					const { i } = JSON.parse(roomData);
 					roomId = i;
 				} else {
 					roomId = RED.util.evaluateNodeProperty(room, roomType, this, msg);
 				}
-			} else if (origin === 'user') {
-				roomId = '__my_messages__';
 			}
 
 			const apiInstance = api({ host: configHost, user, token });
@@ -116,12 +116,22 @@ module.exports = function (RED) {
 					};
 
 					const doLogin = () => {
-						const loginMessage = {
-							msg: 'method',
-							method: 'login',
-							params: [{ resume: token }],
-							id: '1',
-						};
+						let loginMessage;
+						if (origin === 'live') {
+							loginMessage = {
+								msg: 'method',
+								method: 'livechat:setUpConnection',
+								params: [{ token: 'wb7yeib6lumirj0fyte72' }],
+								id: 'ddp-1',
+							};
+						} else {
+							loginMessage = {
+								msg: 'method',
+								method: 'login',
+								params: [{ resume: token }],
+								id: '1',
+							};
+						}
 						wsSend(loginMessage);
 					};
 
@@ -163,7 +173,9 @@ module.exports = function (RED) {
 					ws.onerror = () => {};
 
 					ws.on('message', (data) => {
-						const { id, msg, error, fields } = EJSON.parse(data);
+						const parsed = EJSON.parse(data);
+						const { id, msg, error, fields } = parsed;
+						node.send(parsed);
 
 						switch (msg) {
 							case 'connected':
@@ -221,6 +233,7 @@ module.exports = function (RED) {
 			};
 
 			startListening();
+			node.send(msg);
 		});
 	}
 
