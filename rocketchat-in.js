@@ -247,12 +247,9 @@ module.exports = function (RED) {
 										const { eventName, args } = fields;
 										if (eventName === roomId) {
 											const [message] = args;
-											const {
-												rid,
-												u: { _id: fromUser },
-											} = message;
+											const { rid, u: { _id: fromUser } = {}, token } = message;
 											if (origin === 'live') {
-												if (message.token !== liveChatToken) {
+												if (token !== liveChatToken) {
 													node.send({
 														payload: message,
 														websocket_session_id: liveChatToken,
