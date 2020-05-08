@@ -218,63 +218,72 @@ module.exports = function (RED) {
 						const parsed = EJSON.parse(data);
 						const { id, msg, error, fields } = parsed;
 
-						switch (msg) {
-							case 'connected':
-								doLogin();
-								break;
-							case 'ping':
-								wsSend({ msg: 'pong' });
-								heartbeat();
-								break;
-							case 'result':
-								if (id === '1' || id === 'ddp-1') {
-									// Login
-									if (error != null) {
-										node.error(RED._('rocketchat-in.errors.error-processing', error));
-										node.status({
-											fill: 'red',
-											shape: 'ring',
-											text: RED._('rocketchat-in.errors.error-processing', error),
-										});
-									} else {
-										subscribeMessages();
-									}
-								}
-								break;
-							case 'changed':
-								if (fields != null) {
-									const { eventName, args } = fields;
-									if (eventName === roomId) {
-										const [message] = args;
-										const {
-											rid,
-											u: { _id: fromUser },
-										} = message;
-										if (origin === 'live') {
-											if (message.token !== liveChatToken) {
-												node.send({
-													payload: message,
-													websocket_session_id: liveChatToken,
-													_session: {
-														type: 'websocket',
-														id: liveChatToken,
-													},
-												});
-												apiInstance.markAsRead({ rid });
-											}
+						try {
+							switch (msg) {
+								case 'connected':
+									doLogin();
+									break;
+								case 'ping':
+									wsSend({ msg: 'pong' });
+									heartbeat();
+									break;
+								case 'result':
+									if (id === '1' || id === 'ddp-1') {
+										// Login
+										if (error != null) {
+											node.error(RED._('rocketchat-in.errors.error-processing', error));
+											node.status({
+												fill: 'red',
+												shape: 'ring',
+												text: RED._('rocketchat-in.errors.error-processing', error),
+											});
 										} else {
-											if (fromUser !== user) {
-												node.send({
-													payload: message,
-												});
-											}
-											apiInstance.markAsRead({ rid });
+											subscribeMessages();
 										}
 									}
-								}
-								break;
-							default:
-								break;
+									break;
+								case 'changed':
+									if (fields != null) {
+										const { eventName, args } = fields;
+										if (eventName === roomId) {
+											const [message] = args;
+											const {
+												rid,
+												u: { _id: fromUser },
+											} = message;
+											if (origin === 'live') {
+												if (message.token !== liveChatToken) {
+													node.send({
+														payload: message,
+														websocket_session_id: liveChatToken,
+														_session: {
+															type: 'websocket',
+															id: liveChatToken,
+														},
+													});
+													apiInstance.markAsRead({ rid });
+												}
+											} else {
+												if (fromUser !== user) {
+													node.send({
+														payload: message,
+													});
+												}
+												apiInstance.markAsRead({ rid });
+											}
+										}
+									}
+									break;
+								default:
+									break;
+							}
+						} catch (error) {
+							node.error(RED._('rocketchat-in.errors.error-processing', error));
+							node.status({
+								fill: 'red',
+								shape: 'ring',
+								text: RED._('rocketchat-in.errors.error-processing', error),
+							});
 						}
 					});
 				} catch (error) {
