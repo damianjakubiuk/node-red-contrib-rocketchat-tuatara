@@ -80,17 +80,25 @@ module.exports = function (RED) {
 						break;
 					}
 					case 'live': {
-						await apiInstance.createLiveChatVisitor({
-							name: liveChatName,
-							email: liveChatEmail,
-							token: liveChatToken,
-						});
-						const { success, config } = await apiInstance.getLiveChatConfig({
-							token: liveChatToken,
-						});
-						const { room } = await apiInstance.createLiveChatRoom({ token: liveChatToken });
-						config.room_id = room._id;
-						processResponse(success, config);
+						if (msg.payload.escalate) {
+							await apiInstance.createLiveChatVisitor({
+								name: liveChatName,
+								email: liveChatEmail,
+								token: liveChatToken,
+							});
+						} else {
+							await apiInstance.createLiveChatVisitor({
+								name: liveChatName,
+								email: liveChatEmail,
+								token: liveChatToken,
+							});
+							const { success, config } = await apiInstance.getLiveChatConfig({
+								token: liveChatToken,
+							});
+							const { room } = await apiInstance.createLiveChatRoom({ token: liveChatToken });
+							config.room_id = room._id;
+							processResponse(success, config);
+						}
 						break;
 					}
 
