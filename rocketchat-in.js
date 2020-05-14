@@ -13,7 +13,16 @@ module.exports = function (RED) {
 		node.server = RED.nodes.getNode(config.server);
 
 		node.on('input', async function (msg) {
-			const { origin, room, roomType, roomData, liveChatTokenConfig, liveChatTokenConfigType } = config;
+			const {
+				origin,
+				room,
+				roomType,
+				roomData,
+				liveChatTokenConfig,
+				liveChatTokenConfigType,
+				liveChatSessionConfig,
+				liveChatSessionConfigType,
+			} = config;
 			if (node.server == null) {
 				node.status({ fill: 'red', shape: 'ring', text: 'rocketchat-in.errors.invalid-data' });
 				return;
@@ -44,6 +53,13 @@ module.exports = function (RED) {
 				this,
 				msg
 			);
+			const liveChatSession = RED.util.evaluateNodeProperty(
+				liveChatSessionConfig,
+				liveChatSessionConfigType,
+				this,
+				msg
+			);
+
 			const apiInstance = api({ host: configHost, user, token });
 
 			const processUnreadMessages = async () => {
@@ -252,10 +268,10 @@ module.exports = function (RED) {
 												if (token !== liveChatToken) {
 													node.send({
 														payload: message,
-														websocket_session_id: liveChatToken,
+														websocket_session_id: liveChatSession,
 														_session: {
 															type: 'websocket',
-															id: liveChatToken,
+															id: liveChatSession,
 														},
 													});
 													apiInstance.markAsRead({ rid });

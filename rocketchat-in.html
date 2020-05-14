@@ -33,6 +33,13 @@
 		</label>
 		<input type="text" id="node-input-liveChatTokenConfig" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.liveChatTokenConfig">
 	</div>
+	<div id="row-live-session" class="form-row server-dependent" style="display: none;">
+		<label for="node-input-liveChatSessionConfig">
+			<i class="fa fa-commenting-o"></i>
+			<span data-i18n="rocketchat-out.label.liveChatSessionConfig"></span>
+		</label>
+		<input type="text" id="node-input-liveChatSessionConfig" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.liveChatSessionConfig">
+	</div>
 </script>
 
 <script type="text/javascript">
@@ -49,6 +56,8 @@
 			roomData: { value: '' },
 			liveChatTokenConfig: { value: '', validate: RED.validators.typedInput('liveChatTokenConfigType') },
 			liveChatTokenConfigType: { value: 'str' },
+			liveChatSessionConfig: { value: '', validate: RED.validators.typedInput('liveChatSessionConfigType') },
+			liveChatSessionConfigType: { value: 'str' },
 		},
 		inputs: 1,
 		outputs: 1,
@@ -115,6 +124,12 @@
 			});
 			$('#node-input-liveChatTokenConfig').typedInput('value', node.liveChatTokenConfig);
 			$('#node-input-liveChatTokenConfig').typedInput('type', node.liveChatTokenConfigType);
+			$('#node-input-liveChatSessionConfig').typedInput({
+				default: node.liveChatSessionConfigType || 'str',
+				types: ['msg', 'flow', 'global', 'env', 'str'],
+			});
+			$('#node-input-liveChatSessionConfig').typedInput('value', node.liveChatSessionConfig);
+			$('#node-input-liveChatSessionConfig').typedInput('type', node.liveChatSessionConfigType);
 
 			$('#node-input-room-autocomplete').autocomplete({
 				source: function (request, response) {
@@ -147,6 +162,7 @@
 		oneditsave: function () {
 			const node = this;
 			node.liveChatTokenConfigType = $('#node-input-liveChatTokenConfig').typedInput('type');
+			node.liveChatSessionConfigType = $('#node-input-liveChatSessionConfig').typedInput('type');
 			node.roomType = $('#node-input-room').typedInput('type');
 			if (node.roomType === 'form') {
 				node.roomData = JSON.stringify({
