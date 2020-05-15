@@ -1,26 +1,44 @@
 <script type="text/x-red" data-template-name="rocketchat-in">
 	<div class="form-row">
-	  <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="rocketchat-in.label.name"></span></label>
-	  <input type="text" id="node-input-name" placeholder="Name">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="rocketchat-in.label.name"></span></label>
+		<input type="text" id="node-input-name" placeholder="Name">
 	</div>
 	<div class="form-row">
-	  <label for="node-input-server"><i class="fa fa-tasks"></i> <span data-i18n="rocketchat-in.label.server"></span></label>
-	  <input type="text" id="node-input-server" data-i18n="[placeholder]rocketchat-in.label.server">
+		<label for="node-input-server"><i class="fa fa-tasks"></i> <span data-i18n="rocketchat-in.label.server"></span></label>
+		<input type="text" id="node-input-server" data-i18n="[placeholder]rocketchat-in.label.server">
 	</div>
 	<div class="form-row server-dependent">
 		<label for="node-input-origin"><i class="fa fa-inbox"></i> <span data-i18n="rocketchat-in.label.origin"></span></label>
 		<select id="node-input-origin" style="width: 70%">
 			<option value="user" data-i18n="rocketchat-in.origins.user"></option>
 			<option value="room" data-i18n="rocketchat-in.origins.room"></option>
+			<option value="live" data-i18n="rocketchat-in.origins.live"></option>
 		</select>
 	</div>
 	<div id="row-room" class="form-row" style="display: none;">
-		<label for="node-input-room"><i class="fa fa-hashtag"></i>  <span data-i18n="rocketchat-in.label.room"></span></label>
+		<label for="node-input-room">
+			<i class="fa fa-hashtag"></i>
+			<span data-i18n="rocketchat-in.label.room"></span>
+		</label>
 		<input type="text" style="width: 70%;" id="node-input-room" data-i18n="[placeholder]rocketchat-in.label.room">
 		<div id="room-autocomplete-row" class="form-row" style="margin-top: 5px; margin-left: 104px;width: 70%;display:none;">
 			<input type="text" style="width: 100%;" id="node-input-room-autocomplete" data-i18n="[placeholder]rocketchat-in.label.autocomplete">
 			<input type="hidden" id="node-input-room-autocomplete-id">
 		</div>
+	</div>
+	<div id="row-live-token" class="form-row server-dependent" style="display: none;">
+		<label for="node-input-liveChatTokenConfig">
+			<i class="fa fa-commenting-o"></i>
+			<span data-i18n="rocketchat-out.label.liveChatTokenConfig"></span>
+		</label>
+		<input type="text" id="node-input-liveChatTokenConfig" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.liveChatTokenConfig">
+	</div>
+	<div id="row-live-session" class="form-row server-dependent" style="display: none;">
+		<label for="node-input-liveChatSessionConfig">
+			<i class="fa fa-commenting-o"></i>
+			<span data-i18n="rocketchat-out.label.liveChatSessionConfig"></span>
+		</label>
+		<input type="text" id="node-input-liveChatSessionConfig" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.liveChatSessionConfig">
 	</div>
 </script>
 
@@ -35,17 +53,21 @@
 			origin: { value: 'user' },
 			room: { value: '' },
 			roomType: { value: 'form' },
-			roomData: { value: '' }
+			roomData: { value: '' },
+			liveChatTokenConfig: { value: '', validate: RED.validators.typedInput('liveChatTokenConfigType') },
+			liveChatTokenConfigType: { value: 'str' },
+			liveChatSessionConfig: { value: '', validate: RED.validators.typedInput('liveChatSessionConfigType') },
+			liveChatSessionConfigType: { value: 'str' },
 		},
-		inputs: 0,
+		inputs: 1,
 		outputs: 1,
 		icon: 'rocketchat.png',
-		label: function() {
+		label: function () {
 			return this.name || 'Rocket.Chat Receiver';
 		},
-		oneditprepare: function() {
+		oneditprepare: function () {
 			const node = this;
-			$('#node-input-server').change(function() {
+			$('#node-input-server').change(function () {
 				const server = $(this).val();
 				if (server === '_ADD_') {
 					$('.server-dependent').hide();
@@ -53,12 +75,22 @@
 					$('.server-dependent').show();
 				}
 			});
-			$('#node-input-origin').change(function() {
+			$('#node-input-origin').change(function () {
 				const origin = $(this).val();
-				if (origin === 'room') {
-					$('#row-room').show();
-				} else {
-					$('#row-room').hide();
+				$('#row-room').hide();
+				$('#row-live-token').hide();
+				switch (origin) {
+					case 'user':
+						break;
+					case 'room':
+						$('#row-room').show();
+						break;
+					case 'live':
+						$('#row-room').show();
+						$('#row-live-token').show();
+						break;
+					default:
+						break;
 				}
 			});
 			$('#node-input-room')
@@ -72,11 +104,11 @@
 						{
 							value: 'form',
 							label: node._('rocketchat-in.label.autocomplete'),
-							hasValue: false
-						}
-					]
+							hasValue: false,
+						},
+					],
 				})
-				.change(function() {
+				.change(function () {
 					var type = $(this).typedInput('type');
 					if (type === 'form') {
 						$('#room-autocomplete-row').show();
@@ -86,27 +118,40 @@
 					}
 				});
 
+			$('#node-input-liveChatTokenConfig').typedInput({
+				default: node.liveChatTokenConfigType || 'str',
+				types: ['msg', 'flow', 'global', 'env', 'str'],
+			});
+			$('#node-input-liveChatTokenConfig').typedInput('value', node.liveChatTokenConfig);
+			$('#node-input-liveChatTokenConfig').typedInput('type', node.liveChatTokenConfigType);
+			$('#node-input-liveChatSessionConfig').typedInput({
+				default: node.liveChatSessionConfigType || 'str',
+				types: ['msg', 'flow', 'global', 'env', 'str'],
+			});
+			$('#node-input-liveChatSessionConfig').typedInput('value', node.liveChatSessionConfig);
+			$('#node-input-liveChatSessionConfig').typedInput('type', node.liveChatSessionConfigType);
+
 			$('#node-input-room-autocomplete').autocomplete({
-				source: function(request, response) {
+				source: function (request, response) {
 					const server = $('#node-input-server').val();
 					$.ajax({
 						url: 'rocketchat-server/' + server + '/spotlight/' + request.term,
 						type: 'GET',
 						dataType: 'json',
-						success: options => {
+						success: (options) => {
 							return response(
-								(options.rooms || []).map(opt => ({
+								(options.rooms || []).map((opt) => ({
 									id: opt._id,
-									value: opt.name
+									value: opt.name,
 								}))
 							);
-						}
+						},
 					});
 				},
 				minLength: 2,
-				select: function(event, ui) {
+				select: function (event, ui) {
 					$('#node-input-room-autocomplete-id').val(ui.item.id);
-				}
+				},
 			});
 			if (node.roomType === 'form') {
 				const { i, l } = JSON.parse(node.roomData);
@@ -114,17 +159,19 @@
 				$('#node-input-room-autocomplete-id').val(i);
 			}
 		},
-		oneditsave: function() {
+		oneditsave: function () {
 			const node = this;
+			node.liveChatTokenConfigType = $('#node-input-liveChatTokenConfig').typedInput('type');
+			node.liveChatSessionConfigType = $('#node-input-liveChatSessionConfig').typedInput('type');
 			node.roomType = $('#node-input-room').typedInput('type');
 			if (node.roomType === 'form') {
 				node.roomData = JSON.stringify({
 					i: $('#node-input-room-autocomplete-id').val(),
-					l: $('#node-input-room-autocomplete').val()
+					l: $('#node-input-room-autocomplete').val(),
 				});
 			} else {
 				node.roomData = '{}';
 			}
-		}
+		},
 	});
 </script>

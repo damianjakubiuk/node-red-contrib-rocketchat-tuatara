@@ -1,7 +1,7 @@
 <script type="text/x-red" data-template-name="rocketchat-create">
 	<div class="form-row">
-	  <label for="node-input-server"><i class="fa fa-tasks"></i> <span data-i18n="rocketchat-create.label.server"></span></label>
-	  <input type="text" id="node-input-server" data-i18n="[placeholder]rocketchat-create.label.server">
+		<label for="node-input-server"><i class="fa fa-tasks"></i> <span data-i18n="rocketchat-create.label.server"></span></label>
+		<input type="text" id="node-input-server" data-i18n="[placeholder]rocketchat-create.label.server">
 	</div>
 	<div class="form-row">
 		<label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
@@ -12,6 +12,7 @@
 		<select id="node-input-roomType" style="width: 70%">
 			<option value="channel" data-i18n="rocketchat-create.types.channel"></option>
 			<option value="group" data-i18n="rocketchat-create.types.group"></option>
+			<option value="live" data-i18n="rocketchat-create.types.live"></option>
 		</select>
 	</div>
 	<div class="form-row">
@@ -28,6 +29,27 @@
 		<input type="checkbox" id="node-input-readOnly" style="display:inline-block; width:22px; vertical-align:baseline;"><span data-i18n="rocketchat-create.label.readOnlyDescription"></span>
 		</label>
 	</div>
+	<div class="form-row">
+		<label for="node-input-liveChatTokenConfig">
+			<i class="fa fa-tag"></i>
+			<span data-i18n="rocketchat-create.label.liveChatTokenConfig"></span>
+		</label>
+		<input type="text" id="node-input-liveChatTokenConfig" style="width: 70%" data-i18n="[placeholder]rocketchat-create.label.liveChatTokenConfig">
+	</div>
+	<div class="form-row">
+		<label for="node-input-liveChatEmailConfig">
+			<i class="fa fa-tag"></i>
+			<span data-i18n="rocketchat-create.label.liveChatEmailConfig"></span>
+		</label>
+		<input type="text" id="node-input-liveChatEmailConfig" style="width: 70%" data-i18n="[placeholder]rocketchat-create.label.liveChatEmailConfig">
+	</div>
+	<div class="form-row">
+		<label for="node-input-liveChatNameConfig">
+			<i class="fa fa-tag"></i>
+			<span data-i18n="rocketchat-create.label.liveChatNameConfig"></span>
+		</label>
+		<input type="text" id="node-input-liveChatNameConfig" style="width: 70%" data-i18n="[placeholder]rocketchat-create.label.liveChatNameConfig">
+	</div>
 </script>
 
 <script type="text/javascript">
@@ -39,29 +61,62 @@
 			name: { value: '' },
 			server: { value: '', type: 'rocketchat-server', required: true },
 			roomType: { value: 'group', required: true },
-			roomName: { value: '', required: true, validate: RED.validators.typedInput('roomNameType') },
+			roomName: { value: '', required: false, validate: RED.validators.typedInput('roomNameType') },
 			roomNameType: { value: 'str' },
-			users: { value: '', required: true, validate: RED.validators.typedInput('usersType') },
+			users: { value: '', required: false, validate: RED.validators.typedInput('usersType') },
 			usersType: { value: 'str' },
-			readOnly: { value: false }
+			readOnly: { value: false },
+			liveChatTokenConfig: {
+				value: '',
+				required: false,
+				validate: RED.validators.typedInput('liveChatTokenConfigType'),
+			},
+			liveChatTokenConfigType: { value: 'str' },
+			liveChatEmailConfig: {
+				value: '',
+				required: false,
+				validate: RED.validators.typedInput('liveChatEmailConfigType'),
+			},
+			liveChatEmailConfigType: { value: 'str' },
+			liveChatNameConfig: {
+				value: '',
+				required: false,
+				validate: RED.validators.typedInput('liveChatNameConfigType'),
+			},
+			liveChatNameConfigType: { value: 'str' },
 		},
 		inputs: 1,
 		outputs: 1,
 		icon: 'rocketchat.png',
-		label: function() {
+		label: function () {
 			return this.name || 'Rocket.Chat Create Room';
 		},
-		oneditprepare: function() {
+		oneditprepare: function () {
 			const node = this;
 
 			$('#node-input-roomName').typedInput({
 				default: node.roomNameType || 'str',
-				types: ['msg', 'flow', 'global', 'env', 'str']
+				types: ['msg', 'flow', 'global', 'env', 'str'],
+			});
+
+			$('#node-input-liveChatTokenConfig').typedInput({
+				default: node.liveChatTokenConfigType || 'str',
+				types: ['msg', 'flow', 'global', 'env', 'str'],
+			});
+
+			$('#node-input-liveChatEmailConfig').typedInput({
+				default: node.liveChatEmailConfigType || 'str',
+				types: ['msg', 'flow', 'global', 'env', 'str'],
+			});
+
+			$('#node-input-liveChatNameConfig').typedInput({
+				default: node.liveChatNameConfigType || 'str',
+				types: ['msg', 'flow', 'global', 'env', 'str'],
 			});
 
 			$('#node-input-users').typedInput({
 				default: node.usersType || 'str',
-				types: ['msg', 'flow', 'global', 'env', 'json', 'str']
+				types: ['msg', 'flow', 'global', 'env', 'json', 'str'],
 			});
 
 			if (node.roomName != null) {
@@ -70,11 +125,23 @@
 			if (node.users != null) {
 				$('#node-input-users').typedInput('value', node.users);
 			}
+			if (node.liveChatTokenConfig != null) {
+				$('#node-input-liveChatTokenConfig').typedInput('value', node.liveChatTokenConfig);
+			}
+			if (node.liveChatEmailConfig != null) {
+				$('#node-input-liveChatEmailConfig').typedInput('value', node.liveChatEmailConfig);
+			}
+			if (node.liveChatNameConfig != null) {
+				$('#node-input-liveChatNameConfig').typedInput('value', node.liveChatNameConfig);
+			}
 		},
-		oneditsave: function() {
+		oneditsave: function () {
 			const node = this;
 			node.roomNameType = $('#node-input-roomName').typedInput('type');
 			node.usersType = $('#node-input-users').typedInput('type');
-		}
+			node.liveChatTokenConfigType = $('#node-input-liveChatTokenConfig').typedInput('type');
+			node.liveChatEmailConfigType = $('#node-input-liveChatEmailConfig').typedInput('type');
+			node.liveChatNameConfigType = $('#node-input-liveChatNameConfig').typedInput('type');
+		},
 	});
 </script>

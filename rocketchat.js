@@ -4,12 +4,12 @@ module.exports = ({ host, user, token }) => ({
 	async spotlight(query) {
 		const { data } = await axios.get(`${host}/api/v1/spotlight`, {
 			params: {
-				query
+				query,
 			},
 			headers: {
 				'X-Auth-Token': token,
-				'X-User-Id': user
-			}
+				'X-User-Id': user,
+			},
 		});
 		return data;
 	},
@@ -20,8 +20,8 @@ module.exports = ({ host, user, token }) => ({
 			{
 				headers: {
 					'X-Auth-Token': token,
-					'X-User-Id': user
-				}
+					'X-User-Id': user,
+				},
 			}
 		);
 		return data;
@@ -33,8 +33,8 @@ module.exports = ({ host, user, token }) => ({
 			{
 				headers: {
 					'X-Auth-Token': token,
-					'X-User-Id': user
-				}
+					'X-User-Id': user,
+				},
 			}
 		);
 		return data;
@@ -43,20 +43,20 @@ module.exports = ({ host, user, token }) => ({
 		const { data } = await axios.get(`${host}/api/v1/subscriptions.get`, {
 			headers: {
 				'X-Auth-Token': token,
-				'X-User-Id': user
-			}
+				'X-User-Id': user,
+			},
 		});
 		return data;
 	},
 	async getSubscription({ roomId }) {
 		const { data } = await axios.get(`${host}/api/v1/subscriptions.getOne`, {
 			params: {
-				roomId
+				roomId,
 			},
 			headers: {
 				'X-Auth-Token': token,
-				'X-User-Id': user
-			}
+				'X-User-Id': user,
+			},
 		});
 
 		return data;
@@ -79,12 +79,12 @@ module.exports = ({ host, user, token }) => ({
 			const { data } = await axios.get(`${host}/api/v1/${endpoint}.history`, {
 				params: {
 					roomId,
-					oldest
+					oldest,
 				},
 				headers: {
 					'X-Auth-Token': token,
-					'X-User-Id': user
-				}
+					'X-User-Id': user,
+				},
 			});
 			return data;
 		} catch ({ message }) {
@@ -99,8 +99,8 @@ module.exports = ({ host, user, token }) => ({
 			{
 				headers: {
 					'X-Auth-Token': token,
-					'X-User-Id': user
-				}
+					'X-User-Id': user,
+				},
 			}
 		);
 		return data;
@@ -112,8 +112,8 @@ module.exports = ({ host, user, token }) => ({
 			{
 				headers: {
 					'X-Auth-Token': token,
-					'X-User-Id': user
-				}
+					'X-User-Id': user,
+				},
 			}
 		);
 		return data;
@@ -125,10 +125,28 @@ module.exports = ({ host, user, token }) => ({
 			{
 				headers: {
 					'X-Auth-Token': token,
-					'X-User-Id': user
-				}
+					'X-User-Id': user,
+				},
 			}
 		);
 		return data;
-	}
+	},
+	async getLiveChatConfig({ token }) {
+		const { data } = await axios.get(`${host}/api/v1/livechat/config?token=${token}`);
+		return data;
+	},
+	async createLiveChatVisitor({ name, email, token }) {
+		const { data } = await axios.post(`${host}/api/v1/livechat/visitor`, {
+			visitor: { name, email, token },
+		});
+		return data;
+	},
+	async createLiveChatRoom({ token }) {
+		const { data } = await axios.get(`${host}/api/v1/livechat/room?token=${token}`);
+		return data;
+	},
+	async liveChatSend({ token, text, rid }) {
+		const { data } = await axios.post(`${host}/api/v1/livechat/message`, { msg: text, token, rid });
+		return data;
+	},
 });

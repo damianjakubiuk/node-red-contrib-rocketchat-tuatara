@@ -11,11 +11,13 @@
 			"alias": "Alias",
 			"emoji": "Emoji",
 			"messageText": "Text",
-			"attachments": "Attachments"
+			"attachments": "Attachments",
+			"liveChatTokenConfig": "Live-chat Token"
 		},
 		"destinations": {
 			"users": "User",
-			"rooms": "Room"
+			"rooms": "Room",
+			"live": "Live-chat"
 		},
 		"errors": {
 			"invalid-data": "Input data is missing",

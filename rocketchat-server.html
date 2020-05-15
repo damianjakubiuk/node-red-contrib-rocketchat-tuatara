@@ -24,10 +24,10 @@
 			name: { value: '', required: true },
 			host: { value: '', required: true },
 			user: { value: '', required: true },
-			token: { value: '', required: true }
+			token: { value: '', required: true },
 		},
-		label: function() {
+		label: function () {
 			return this.name || this.user + '@' + this.host;
-		}
+		},
 	});
 </script>
