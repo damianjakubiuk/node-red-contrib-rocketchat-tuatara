@@ -149,4 +149,13 @@ module.exports = ({ host, user, token }) => ({
 		const { data } = await axios.post(`${host}/api/v1/livechat/message`, { msg: text, token, rid });
 		return data;
 	},
+	async getOfficeHours() {
+		const { data } = await axios.get(`${host}/api/v1/livechat/office-hours`, {
+			headers: {
+				'X-Auth-Token': token,
+				'X-User-Id': user,
+			},
+		});
+		return data;
+	},
 });

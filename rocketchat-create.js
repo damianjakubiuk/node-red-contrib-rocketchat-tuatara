@@ -96,7 +96,10 @@ module.exports = function (RED) {
 								token: liveChatToken,
 							});
 							const { room } = await apiInstance.createLiveChatRoom({ token: liveChatToken });
+							const { officeHours } = await apiInstance.getOfficeHours();
+							config.room = room;
 							config.room_id = room._id;
+							config.officeHours = officeHours;
 							processResponse(success, config);
 						}
 						break;
