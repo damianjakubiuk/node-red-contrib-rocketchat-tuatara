@@ -83,12 +83,11 @@ module.exports = function (RED) {
 					}
 					case 'live': {
 						try {
-							const response = await apiInstance.liveChatSend({
+							await apiInstance.liveChatSend({
 								token: liveChatToken,
 								text,
 								rid: roomId,
 							});
-							node.send({ ...msg, response });
 						} catch (error) {
 							throw new Error(roomId + ':' + token + ':' + EJSON.stringify(error));
 						}
