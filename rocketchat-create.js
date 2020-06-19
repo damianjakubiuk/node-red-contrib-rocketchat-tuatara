@@ -95,7 +95,7 @@ module.exports = function (RED) {
 							const { success, config } = await apiInstance.getLiveChatConfig({
 								token: liveChatToken,
 							});
-							const { room } = await apiInstance.createLiveChatRoom({ token: liveChatToken });
+							const { room } = await apiInstance.createLiveChatRoom({ token: liveChatToken, rid: name });
 							const { officeHours } = await apiInstance.getOfficeHours();
 							config.room = room;
 							config.room_id = room._id;

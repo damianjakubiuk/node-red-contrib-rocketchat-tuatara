@@ -132,7 +132,11 @@ module.exports = ({ host, user, token }) => ({
 		return data;
 	},
 	async getLiveChatConfig({ token }) {
-		const { data } = await axios.get(`${host}/api/v1/livechat/config?token=${token}`);
+		const { data } = await axios.get(`${host}/api/v1/livechat/config`, {
+			params: {
+				token,
+			},
+		});
 		return data;
 	},
 	async createLiveChatVisitor({ name, email, token }) {
@@ -141,8 +145,13 @@ module.exports = ({ host, user, token }) => ({
 		});
 		return data;
 	},
-	async createLiveChatRoom({ token }) {
-		const { data } = await axios.get(`${host}/api/v1/livechat/room?token=${token}`);
+	async createLiveChatRoom({ token, rid }) {
+		const { data } = await axios.get(`${host}/api/v1/livechat/room`, {
+			params: {
+				token,
+				rid,
+			},
+		});
 		return data;
 	},
 	async liveChatSend({ token, text, rid }) {
