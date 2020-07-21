@@ -1,0 +1,18 @@
+{
+	"rocketchat-close": {
+		"label": {
+			"name": "Name",
+			"server": "Server",
+			"destination": "Type",
+			"sending": "Sending...",
+			"liveChatTokenConfig": "Live-chat Token"
+		},
+		"destinations": {
+			"live": "Live-chat"
+		},
+		"errors": {
+			"invalid-data": "Input data is missing",
+			"error-processing": "Errors processing request: __message__"
+		}
+	}
+}

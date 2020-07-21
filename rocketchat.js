@@ -154,6 +154,49 @@ module.exports = ({ host, user, token }) => ({
 		});
 		return data;
 	},
+	async closeLiveChatRoom({ token, rid }) {
+		const { data } = await axios.post(`${host}/api/v1/livechat/room.close`, {
+			token,
+			rid,
+		});
+		return data;
+	},
+	async getLiveChatRooms({ visitorToken }) {
+		const { data } = await axios.get(`${host}/api/v1/livechat/rooms`, {
+			params: {
+				open: true,
+				customFields: {
+					token: visitorToken,
+				},
+			},
+			headers: {
+				'X-Auth-Token': token,
+				'X-User-Id': user,
+			},
+		});
+		return data;
+	},
+	async closeVisitorLiveChatRooms({ token }) {
+		const getRoomsResponse = await this.getLiveChatRooms({
+			visitorToken: token,
+		});
+		for (const room of getRoomsResponse.rooms) {
+			await this.closeLiveChatRoom({
+				token: room.v.token,
+				rid: room._id,
+			});
+		}
+		return getRoomsResponse;
+	},
+	async setCustomField({ token, key, value, overwrite }) {
+		const { data } = await axios.post(`${host}/api/v1/livechat/custom.field`, {
+			token,
+			key,
+			value,
+			overwrite,
+		});
+		return data;
+	},
 	async liveChatSend({ token, text, rid }) {
 		const { data } = await axios.post(`${host}/api/v1/livechat/message`, { msg: text, token, rid });
 		return data;

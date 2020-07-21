@@ -1,0 +1,67 @@
+<script type="text/x-red" data-template-name="rocketchat-close">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="rocketchat-close.label.name"></span></label>
+		<input type="text" id="node-input-name" data-i18n="[placeholder]rocketchat-close.label.name">
+	</div>
+	<div class="form-row">
+		<label for="node-input-server"><i class="fa fa-rocket"></i> <span data-i18n="rocketchat-close.label.server"></span></label>
+		<input type="text" id="node-input-server" data-i18n="[placeholder]rocketchat-close.label.server">
+	</div>
+	<div class="form-row server-dependent">
+		<label for="node-input-destination"><i class="fa fa-inbox"></i> <span data-i18n="rocketchat-close.label.destination"></span></label>
+		<select id="node-input-destination" style="width: 70%">
+			<option value="live" data-i18n="rocketchat-close.destinations.live"></option>
+		</select>
+	</div>
+	<div class="form-row server-dependent">
+		<label for="node-input-liveChatTokenConfig">
+			<i class="fa fa-commenting-o"></i>
+			<span data-i18n="rocketchat-close.label.liveChatTokenConfig"></span>
+		</label>
+		<input type="text" id="node-input-liveChatTokenConfig" style="width: 70%;" data-i18n="[placeholder]rocketchat-close.label.liveChatTokenConfig">
+	</div>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('rocketchat-close', {
+		category: 'Rocket․Chat',
+		color: '#F98F9D',
+		paletteLabel: 'Cleaner',
+		defaults: {
+			name: { value: '' },
+			server: { value: '', type: 'rocketchat-server' },
+			destination: { value: 'live' },
+			liveChatTokenConfig: { value: '', validate: RED.validators.typedInput('liveChatTokenConfigType') },
+			liveChatTokenConfigType: { value: 'str' },
+		},
+		inputs: 1,
+		outputs: 0,
+		icon: 'rocketchat.png',
+		align: 'right',
+		label: function () {
+			return this.name || 'Rocket․Chat Cleaner';
+		},
+		oneditprepare: function () {
+			const node = this;
+			$('#node-input-server').change(function () {
+				const server = $(this).val();
+				if (server === '_ADD_') {
+					$('.server-dependent').hide();
+				} else {
+					$('.server-dependent').show();
+				}
+			});
+
+			$('#node-input-liveChatTokenConfig').typedInput({
+				default: node.liveChatTokenConfigType || 'str',
+				types: ['msg', 'flow', 'global', 'env', 'str'],
+			});
+			$('#node-input-liveChatTokenConfig').typedInput('value', node.liveChatTokenConfig);
+			$('#node-input-liveChatTokenConfig').typedInput('type', node.liveChatTokenConfigType);
+		},
+		oneditsave: function () {
+			const node = this;
+			node.liveChatTokenConfigType = $('#node-input-liveChatTokenConfig').typedInput('type');
+		},
+	});
+</script>
