@@ -26,7 +26,13 @@ module.exports = function (RED) {
 			try {
 				switch (destination) {
 					case 'live': {
-						await apiInstance.closeVisitorLiveChatRooms({ token: liveChatToken });
+						const closeVisitorLiveChatRooms = await apiInstance.closeVisitorLiveChatRooms({
+							token: liveChatToken,
+						});
+						node.send({
+							...msg,
+							closeVisitorLiveChatRooms,
+						});
 						break;
 					}
 					default:
@@ -39,6 +45,10 @@ module.exports = function (RED) {
 					fill: 'red',
 					shape: 'ring',
 					text: RED._('rocketchat-close.errors.error-processing', error),
+				});
+				node.send({
+					...msg,
+					error,
 				});
 			}
 		});

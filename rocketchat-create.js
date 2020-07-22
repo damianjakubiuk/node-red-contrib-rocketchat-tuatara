@@ -97,7 +97,7 @@ module.exports = function (RED) {
 							});
 							await apiInstance.closeVisitorLiveChatRooms({ token: liveChatToken });
 							const { room } = await apiInstance.createLiveChatRoom({ token: liveChatToken, rid: name });
-							await apiInstance.setCustomField({
+							const setCustomField = await apiInstance.setCustomField({
 								token: liveChatToken,
 								key: 'token',
 								value: liveChatToken,
@@ -107,6 +107,7 @@ module.exports = function (RED) {
 							config.room = room;
 							config.room_id = room._id;
 							config.officeHours = officeHours;
+							config.setCustomField = setCustomField;
 							processResponse(success, config);
 						}
 						break;
