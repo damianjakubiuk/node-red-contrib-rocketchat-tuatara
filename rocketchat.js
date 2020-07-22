@@ -180,13 +180,20 @@ module.exports = ({ host, user, token }) => ({
 		const getRoomsResponse = await this.getLiveChatRooms({
 			visitorToken: token,
 		});
+		const promisesArray = [];
 		for (const room of getRoomsResponse.rooms) {
-			await this.closeLiveChatRoom({
-				token: room.v.token,
-				rid: room._id,
-			});
+			promisesArray.push(
+				this.closeLiveChatRoom({
+					token: room.v.token,
+					rid: room._id,
+				})
+			);
 		}
-		return getRoomsResponse;
+		const closeRoomsResponse = await Promise.all(promisesArray);
+		return {
+			getRoomsResponse,
+			closeRoomsResponse,
+		};
 	},
 	async setCustomField({ token, key, value, overwrite }) {
 		const { data } = await axios.post(`${host}/api/v1/livechat/custom.field`, {
