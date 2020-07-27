@@ -4,7 +4,9 @@
 			"name": "Name",
 			"host": "Server",
 			"user": "User Id",
-			"token": "Token"
+			"token": "Token",
+			"department": "Department",
+			"queueDepartment": "Queue department"
 		}
 	}
 }

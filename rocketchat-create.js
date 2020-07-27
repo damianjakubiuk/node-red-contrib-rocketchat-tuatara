@@ -9,7 +9,7 @@ module.exports = function (RED) {
 		node.server = RED.nodes.getNode(config.server);
 
 		node.on('input', async function (msg) {
-			const { host, user, token } = node.server;
+			const { host, user, token, department, queueDepartment } = node.server;
 			const {
 				roomType,
 				roomName,
@@ -86,6 +86,10 @@ module.exports = function (RED) {
 								email: liveChatEmail,
 								token: liveChatToken,
 							});
+							await apiInstance.transferVisitorRooms({
+								token: liveChatToken,
+								department: department,
+							});
 						} else {
 							await apiInstance.createLiveChatVisitor({
 								name: liveChatName,
@@ -102,6 +106,11 @@ module.exports = function (RED) {
 								key: 'token',
 								value: liveChatToken,
 								overwrite: true,
+							});
+							await apiInstance.transferRoom({
+								token: liveChatToken,
+								rid: room._id,
+								department: queueDepartment,
 							});
 							const { officeHours } = await apiInstance.getOfficeHours();
 							config.room = room;

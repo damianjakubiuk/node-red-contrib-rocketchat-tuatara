@@ -204,6 +204,42 @@ module.exports = ({ host, user, token }) => ({
 		});
 		return data;
 	},
+	async transferRoom({ token, rid, department }) {
+		try {
+			const { data } = await axios.post(`${host}/api/v1/livechat/room.transfer`, {
+				token,
+				rid,
+				department,
+			});
+			return data;
+		} catch (error) {
+			if (error.response.data.error === 'error-forwarding-chat-same-department') {
+				return error.response.data;
+			} else {
+				throw error;
+			}
+		}
+	},
+	async transferVisitorRooms({ token, department }) {
+		const getRoomsResponse = await this.getLiveChatRooms({
+			visitorToken: token,
+		});
+		const promisesArray = [];
+		for (const room of getRoomsResponse.rooms) {
+			promisesArray.push(
+				this.transferRoom({
+					token: room.v.token,
+					rid: room._id,
+					department,
+				})
+			);
+		}
+		const closeRoomsResponse = await Promise.all(promisesArray);
+		return {
+			getRoomsResponse,
+			closeRoomsResponse,
+		};
+	},
 	async liveChatSend({ token, text, rid }) {
 		const { data } = await axios.post(`${host}/api/v1/livechat/message`, { msg: text, token, rid });
 		return data;

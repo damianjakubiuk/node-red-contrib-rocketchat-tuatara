@@ -10,6 +10,8 @@ module.exports = function (RED) {
 		this.host = n.host;
 		this.user = n.user;
 		this.token = n.token;
+		this.department = n.department;
+		this.queueDepartment = n.queueDepartment;
 	}
 
 	RED.nodes.registerType('rocketchat-server', RocketChatServer, {
