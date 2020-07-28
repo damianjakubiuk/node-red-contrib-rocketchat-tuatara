@@ -20,7 +20,7 @@
 			"live": "Live-chat"
 		},
 		"errors": {
-			"invalid-data": "Input data is missing",
+			"invalid-data": "Input data is missing: __message__",
 			"error-processing": "Errors processing request: __message__"
 		}
 	}

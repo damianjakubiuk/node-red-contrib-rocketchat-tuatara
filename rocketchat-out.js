@@ -52,9 +52,30 @@ module.exports = function (RED) {
 				msg
 			);
 			if (roomId == null) {
-				node.warn(RED._('rocketchat-out.errors.invalid-data'));
-				node.status({ fill: 'red', shape: 'ring', text: 'rocketchat-out.errors.invalid-data' });
-				return;
+				try {
+					if (config.destination === 'live') {
+						const getLiveChatRoomsResponse = await apiInstance.getLiveChatRooms({
+							visitorToken: liveChatToken,
+						});
+						if (getLiveChatRoomsResponse.rooms.length >= 1) {
+							roomId = getLiveChatRoomsResponse.rooms[0]._id;
+						} else {
+							throw new Error(
+								`Invlid getLiveChatRoomsResponse: ${JSON.stringify(getLiveChatRoomsResponse)}`
+							);
+						}
+					} else {
+						throw new Error('roomId cannot be null when destination is not live');
+					}
+				} catch (error) {
+					node.warn(RED._('rocketchat-out.errors.invalid-data', error));
+					node.status({
+						fill: 'red',
+						shape: 'ring',
+						text: RED._('rocketchat-out.errors.invalid-data', error),
+					});
+					return;
+				}
 			}
 
 			node.status({ fill: 'blue', shape: 'dot', text: 'rocketchat-out.label.sending' });
