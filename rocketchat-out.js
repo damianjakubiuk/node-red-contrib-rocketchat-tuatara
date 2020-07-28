@@ -1,5 +1,4 @@
 const api = require('./rocketchat');
-const EJSON = require('ejson');
 
 module.exports = function (RED) {
 	'use strict';
@@ -110,7 +109,7 @@ module.exports = function (RED) {
 								rid: roomId,
 							});
 						} catch (error) {
-							throw new Error(roomId + ':' + token + ':' + EJSON.stringify(error));
+							throw new Error(roomId + ':' + token + ':' + JSON.stringify(error));
 						}
 						break;
 					}
@@ -119,7 +118,7 @@ module.exports = function (RED) {
 				}
 				node.status({});
 			} catch (error) {
-				node.error(config.destination + error);
+				node.error(RED._('rocketchat-out.errors.error-processing', JSON.stringify(error)));
 				node.status({
 					fill: 'red',
 					shape: 'ring',
