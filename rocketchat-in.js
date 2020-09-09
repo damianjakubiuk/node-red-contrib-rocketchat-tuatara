@@ -267,6 +267,8 @@ module.exports = function (RED) {
 											if (origin === 'live') {
 												if (token !== liveChatToken) {
 													node.send({
+														roomId: roomId,
+														token: liveChatToken,
 														payload: message,
 														websocket_session_id: liveChatSession,
 														_session: {
