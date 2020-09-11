@@ -53,7 +53,7 @@ module.exports = function (RED) {
 					});
 					node.status({});
 				} else {
-					node.error(RED._('rocketchat-create.errors.error-processing', JSON.stringify(errors)));
+					node.error(errors);
 					node.status({
 						fill: 'red',
 						shape: 'ring',
@@ -126,7 +126,7 @@ module.exports = function (RED) {
 						throw new Error('Invalid roomType');
 				}
 			} catch (error) {
-				node.error(RED._('rocketchat-create.errors.error-processing', JSON.stringify(error)));
+				node.error(error);
 				node.status({
 					fill: 'red',
 					shape: 'ring',
