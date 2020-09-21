@@ -108,7 +108,6 @@ module.exports = function (RED) {
 								overwrite: true,
 							});
 							await apiInstance.transferRoom({
-								token: liveChatToken,
 								rid: room._id,
 								department: queueDepartment,
 							});

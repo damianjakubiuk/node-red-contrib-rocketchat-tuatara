@@ -204,13 +204,18 @@ module.exports = ({ host, user, token }) => ({
 		});
 		return data;
 	},
-	async transferRoom({ token, rid, department }) {
+	async transferRoom({ rid, department }) {
 		try {
-			const { data } = await axios.post(`${host}/api/v1/livechat/room.transfer`, {
-				token,
-				rid,
-				department,
-			});
+			const { data } = await axios.post(
+				`${host}/api/v1/livechat/room.forward`,
+				{ roomId: rid, departmentId: department },
+				{
+					headers: {
+						'X-Auth-Token': token,
+						'X-User-Id': user,
+					},
+				}
+			);
 			return data;
 		} catch (error) {
 			if (error.response.data.error === 'error-forwarding-chat-same-department') {
@@ -228,7 +233,6 @@ module.exports = ({ host, user, token }) => ({
 		for (const room of getRoomsResponse.rooms) {
 			promisesArray.push(
 				this.transferRoom({
-					token: room.v.token,
 					rid: room._id,
 					department,
 				})
