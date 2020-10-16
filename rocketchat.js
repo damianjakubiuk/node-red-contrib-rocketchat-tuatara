@@ -218,7 +218,10 @@ module.exports = ({ host, user, token }) => ({
 			);
 			return data;
 		} catch (error) {
-			if (error.response.data.error === 'error-forwarding-chat-same-department') {
+			if (
+				error.response.data.error === 'error-forwarding-chat-same-department' ||
+				error.response.data.errorType === 'error-forwarding-chat-same-department'
+			) {
 				return error.response.data;
 			} else {
 				throw error;
