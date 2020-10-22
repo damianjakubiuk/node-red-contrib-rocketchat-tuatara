@@ -1,0 +1,80 @@
+<script type="text/x-red" data-template-name="rocketchat-custom-field">
+	<div class="form-row">
+		<label for="node-input-server"><i class="fa fa-tasks"></i> <span data-i18n="rocketchat-custom-field.label.server"></span></label>
+		<input type="text" id="node-input-server" data-i18n="[placeholder]rocketchat-custom-field.label.server">
+	</div>
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+		<input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
+	</div>
+	<div class="form-row">
+		<label for="node-input-liveChatTokenConfig">
+			<i class="fa fa-tag"></i>
+			<span data-i18n="rocketchat-custom-field.label.liveChatTokenConfig"></span>
+		</label>
+		<input type="text" id="node-input-liveChatTokenConfig" style="width: 70%" data-i18n="[placeholder]rocketchat-custom-field.label.liveChatTokenConfig">
+	</div>
+	<div class="form-row">
+		<label for="node-input-customFields">
+			<i class="fa fa-tag"></i>
+			<span data-i18n="rocketchat-custom-field.label.customFields"></span>
+		</label>
+		<input type="text" id="node-input-customFields" data-i18n="[placeholder]rocketchat-custom-field.label.customFields">
+		<input type="hidden" id="node-input-customFields-type">
+	</div>
+</script>
+
+<script type="text/javascript">
+	RED.nodes.registerType('rocketchat-custom-field', {
+		category: 'Rocket․Chat',
+		color: '#F98F9D',
+		paletteLabel: 'Set custom field',
+		defaults: {
+			name: { value: '' },
+			server: { value: '', type: 'rocketchat-server', required: true },
+			liveChatTokenConfig: {
+				value: '',
+				required: true,
+				validate: RED.validators.typedInput('liveChatTokenConfigType'),
+			},
+			liveChatTokenConfigType: { value: 'msg' },
+			customFields: {
+				value: '',
+				required: true,
+				validate: RED.validators.typedInput('customFieldsType'),
+			},
+			customFieldsType: { value: 'msg' },
+		},
+		inputs: 1,
+		outputs: 1,
+		icon: 'rocketchat.png',
+		label: function () {
+			return this.name || 'Rocket.Chat set custom field';
+		},
+		oneditprepare: function () {
+			const node = this;
+
+			$('#node-input-liveChatTokenConfig').typedInput({
+				default: node.liveChatTokenConfigType || 'str',
+				types: ['msg', 'flow', 'global', 'env', 'str'],
+			});
+			if (node.liveChatTokenConfig != null) {
+				$('#node-input-liveChatTokenConfig').typedInput('value', node.liveChatTokenConfig);
+			}
+
+			$('#node-input-customFields').typedInput({
+				type: 'msg',
+				types: ['msg', 'flow', 'global', 'json'],
+				typeField: '#node-input-customFields-type',
+			});
+			if (node.customFields != null) {
+				$('#node-input-customFields').typedInput('value', node.customFields);
+			}
+		},
+		oneditsave: function () {
+			const node = this;
+			node.liveChatTokenConfigType = $('#node-input-liveChatTokenConfig').typedInput('type');
+			node.customFieldsType = $('#node-input-customFields').typedInput('type');
+		},
+	});
+</script>

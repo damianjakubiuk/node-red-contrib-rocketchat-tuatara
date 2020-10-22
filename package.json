@@ -28,7 +28,8 @@
 			"rocketchat-out": "rocketchat-out.js",
 			"rocketchat-create": "rocketchat-create.js",
 			"rocketchat-server": "rocketchat-server.js",
-			"rocketchat-close": "rocketchat-close.js"
+			"rocketchat-close": "rocketchat-close.js",
+			"rocketchat-custom-field": "rocketchat-custom-field.js"
 		}
 	},
 	"dependencies": {
