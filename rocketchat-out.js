@@ -1,5 +1,21 @@
 const api = require('./rocketchat');
 
+function safeStringify(obj, indent = 2) {
+	let cache = [];
+	const retVal = JSON.stringify(
+		obj,
+		(key, value) =>
+			typeof value === 'object' && value !== null
+				? cache.includes(value)
+					? undefined // Duplicate reference found, discard key
+					: cache.push(value) && value // Store value in our collection
+				: value,
+		indent
+	);
+	cache = null;
+	return retVal;
+}
+
 module.exports = function (RED) {
 	'use strict';
 
@@ -109,7 +125,7 @@ module.exports = function (RED) {
 								rid: roomId,
 							});
 						} catch (error) {
-							throw new Error(roomId + ':' + token + ':' + JSON.stringify(error));
+							throw new Error(roomId + ':' + token + ':' + safeStringify(error));
 						}
 						break;
 					}
@@ -118,7 +134,7 @@ module.exports = function (RED) {
 				}
 				node.status({});
 			} catch (error) {
-				node.error(RED._('rocketchat-out.errors.error-processing', JSON.stringify(error)));
+				node.error(RED._('rocketchat-out.errors.error-processing', safeStringify(error)));
 				node.status({
 					fill: 'red',
 					shape: 'ring',
