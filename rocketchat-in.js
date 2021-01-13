@@ -66,14 +66,6 @@ module.exports = function (RED) {
 				);
 
 				let numberOfTries = 0;
-				node.send({
-					payload: {
-						numberOfTries,
-						retries,
-						maxRetries,
-						retriesInterval,
-					},
-				});
 
 				const apiInstance = api({ host: configHost, user, token });
 
@@ -142,14 +134,6 @@ module.exports = function (RED) {
 				};
 
 				const startListening = () => {
-					node.send({
-						payload: {
-							numberOfTries,
-							retries,
-							maxRetries,
-							retriesInterval,
-						},
-					});
 					if (numberOfTries >= retries) {
 						if (numberOfTries < maxRetries) {
 							setTimeout(startListening, 10000);
@@ -264,6 +248,12 @@ module.exports = function (RED) {
 						ws.on('message', (data) => {
 							const parsed = EJSON.parse(data);
 							const { id, msg, error, fields } = parsed;
+							// console.log('message: ', parsed);
+							node.send({
+								payload: {
+									message: parsed,
+								},
+							});
 
 							try {
 								switch (msg) {
