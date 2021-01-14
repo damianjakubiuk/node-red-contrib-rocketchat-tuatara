@@ -134,10 +134,11 @@ module.exports = function (RED) {
 				};
 
 				const startListening = () => {
-					if (numberOfTries >= retries) {
+					if (numberOfTries > retries) {
 						if (numberOfTries < maxRetries) {
 							setTimeout(startListening, 10000);
 						}
+						numberOfTries++;
 						return;
 					} else {
 						numberOfTries++;
@@ -209,10 +210,14 @@ module.exports = function (RED) {
 
 						const heartbeat = () => {
 							clearTimeout(ws.pingTimeout);
+							clearInterval(ws.pingInterval);
 							ws.pingTimeout = setTimeout(() => {
 								node.warn(RED._('rocketchat-in.errors.connection-broken'));
 								ws.terminate();
 							}, 30000 + 1000);
+							ws.pingInterval = setInterval(() => {
+								wsSend({ msg: 'ping' });
+							}, 5000);
 						};
 
 						ws.on('open', () => {
@@ -236,6 +241,7 @@ module.exports = function (RED) {
 
 						ws.on('close', () => {
 							// try to reconect in 10 seconds
+							clearInterval(ws.pingInterval);
 							node.warn(RED._('rocketchat-in.errors.connection-broken'));
 							ws.terminate();
 							setTimeout(startListening, 10000);
@@ -262,6 +268,9 @@ module.exports = function (RED) {
 										break;
 									case 'ping':
 										wsSend({ msg: 'pong' });
+										heartbeat();
+										break;
+									case 'pong':
 										heartbeat();
 										break;
 									case 'result':
