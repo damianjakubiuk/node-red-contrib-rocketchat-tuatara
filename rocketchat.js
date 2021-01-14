@@ -176,18 +176,20 @@ module.exports = ({ host, user, token }) => ({
 		});
 		return data;
 	},
-	async closeVisitorLiveChatRooms({ token }) {
+	async closeVisitorLiveChatRooms({ token, except = [] }) {
 		const getRoomsResponse = await this.getLiveChatRooms({
 			visitorToken: token,
 		});
 		const promisesArray = [];
 		for (const room of getRoomsResponse.rooms) {
-			promisesArray.push(
-				this.closeLiveChatRoom({
-					token: room.v.token,
-					rid: room._id,
-				})
-			);
+			if (!except.includes(room._id)) {
+				promisesArray.push(
+					this.closeLiveChatRoom({
+						token: room.v.token,
+						rid: room._id,
+					})
+				);
+			}
 		}
 		const closeRoomsResponse = await Promise.all(promisesArray);
 		return {

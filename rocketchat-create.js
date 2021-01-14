@@ -99,8 +99,25 @@ module.exports = function (RED) {
 							const { success, config } = await apiInstance.getLiveChatConfig({
 								token: liveChatToken,
 							});
-							await apiInstance.closeVisitorLiveChatRooms({ token: liveChatToken });
-							const { room } = await apiInstance.createLiveChatRoom({ token: liveChatToken, rid: name });
+							const getLiveChatRoomsResponse = await apiInstance.getLiveChatRooms({
+								visitorToken: liveChatToken,
+							});
+							let room;
+							let newRoom = false;
+							if (getLiveChatRoomsResponse.rooms.length >= 1) {
+								room = getLiveChatRoomsResponse.rooms[0];
+								await apiInstance.closeVisitorLiveChatRooms({
+									token: liveChatToken,
+									except: [room._id],
+								});
+							} else {
+								let createLiveChatRoomResponse = await apiInstance.createLiveChatRoom({
+									token: liveChatToken,
+									rid: name,
+								});
+								room = createLiveChatRoomResponse.room;
+								newRoom = true;
+							}
 							const setCustomField = await apiInstance.setCustomField({
 								token: liveChatToken,
 								key: 'token',
@@ -114,8 +131,10 @@ module.exports = function (RED) {
 							const { officeHours } = await apiInstance.getOfficeHours();
 							config.room = room;
 							config.room_id = room._id;
+							config.newRoom = newRoom;
 							config.officeHours = officeHours;
 							config.setCustomField = setCustomField;
+							config.payload = msg.payload;
 							processResponse(success, config);
 						}
 						break;
