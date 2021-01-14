@@ -254,12 +254,6 @@ module.exports = function (RED) {
 						ws.on('message', (data) => {
 							const parsed = EJSON.parse(data);
 							const { id, msg, error, fields } = parsed;
-							// console.log('message: ', parsed);
-							node.send({
-								payload: {
-									message: parsed,
-								},
-							});
 
 							try {
 								switch (msg) {
