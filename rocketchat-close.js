@@ -67,6 +67,9 @@ module.exports = function (RED) {
 						}
 						const closeRoomsResponse = await Promise.all(promisesArray);
 						node.send({
+							getRoomsResponse,
+							liveTime,
+							liveTimeInMiliseconds,
 							closeRoomsResponse,
 						});
 						break;
