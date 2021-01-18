@@ -11,8 +11,8 @@ module.exports = function (RED) {
 		const {
 			liveChatTokenConfig,
 			liveChatTokenConfigType,
-			liveTimeConfigConfig,
-			liveTimeConfigConfigType,
+			liveTimeConfig,
+			liveTimeConfigType,
 			destination,
 		} = config;
 
@@ -28,7 +28,7 @@ module.exports = function (RED) {
 				msg
 			);
 
-			const liveTime = RED.util.evaluateNodeProperty(liveTimeConfigConfig, liveTimeConfigConfigType, this, msg);
+			const liveTime = RED.util.evaluateNodeProperty(liveTimeConfig, liveTimeConfigType, this, msg);
 
 			node.status({ fill: 'blue', shape: 'dot', text: 'rocketchat-close.label.sending' });
 			try {
