@@ -161,13 +161,17 @@ module.exports = ({ host, user, token }) => ({
 		});
 		return data;
 	},
-	async getLiveChatRooms({ visitorToken }) {
+	async getLiveChatRooms({ open = true, visitorToken } = {}) {
+		let customFields;
+		if (visitorToken) {
+			customFields = {
+				token: visitorToken,
+			};
+		}
 		const { data } = await axios.get(`${host}/api/v1/livechat/rooms`, {
 			params: {
-				open: true,
-				customFields: {
-					token: visitorToken,
-				},
+				open,
+				customFields,
 			},
 			headers: {
 				'X-Auth-Token': token,

@@ -8,7 +8,13 @@ module.exports = function (RED) {
 		const node = this;
 		node.server = RED.nodes.getNode(config.server);
 
-		const { liveChatTokenConfig, liveChatTokenConfigType, destination } = config;
+		const {
+			liveChatTokenConfig,
+			liveChatTokenConfigType,
+			liveTimeConfigConfig,
+			liveTimeConfigConfigType,
+			destination,
+		} = config;
 
 		node.on('input', async function (msg) {
 			const { host, user, token } = node.server;
@@ -22,16 +28,46 @@ module.exports = function (RED) {
 				msg
 			);
 
+			const liveTime = RED.util.evaluateNodeProperty(liveTimeConfigConfig, liveTimeConfigConfigType, this, msg);
+
 			node.status({ fill: 'blue', shape: 'dot', text: 'rocketchat-close.label.sending' });
 			try {
 				switch (destination) {
 					case 'live': {
-						const closeVisitorLiveChatRooms = await apiInstance.closeVisitorLiveChatRooms({
-							token: liveChatToken,
-						});
+						if (liveChatToken) {
+							const closeVisitorLiveChatRooms = await apiInstance.closeVisitorLiveChatRooms({
+								token: liveChatToken,
+							});
+							node.send({
+								...msg,
+								closeVisitorLiveChatRooms,
+							});
+						} else {
+							throw new Error('liveChatToken has to be set.');
+						}
+						break;
+					}
+					case 'live-all': {
+						const getRoomsResponse = await apiInstance.getLiveChatRooms();
+						const promisesArray = [];
+						const liveTimeInMiliseconds = liveTime * 1000;
+						const now = new Date().getTime();
+						for (const room of getRoomsResponse.rooms) {
+							const lastMessgae = Date.parse(room.lm);
+							const lastMessgaePlusFiveMinutes = lastMessgae + liveTimeInMiliseconds;
+							const isBefore = lastMessgaePlusFiveMinutes < now;
+							if (isBefore) {
+								promisesArray.push(
+									apiInstance.closeLiveChatRoom({
+										token: room.v.token,
+										rid: room._id,
+									})
+								);
+							}
+						}
+						const closeRoomsResponse = await Promise.all(promisesArray);
 						node.send({
-							...msg,
-							closeVisitorLiveChatRooms,
+							closeRoomsResponse,
 						});
 						break;
 					}

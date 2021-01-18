@@ -11,14 +11,22 @@
 		<label for="node-input-destination"><i class="fa fa-inbox"></i> <span data-i18n="rocketchat-close.label.destination"></span></label>
 		<select id="node-input-destination" style="width: 70%">
 			<option value="live" data-i18n="rocketchat-close.destinations.live"></option>
+			<option value="live-all" data-i18n="rocketchat-close.destinations.live-all"></option>
 		</select>
 	</div>
-	<div class="form-row server-dependent">
+	<div id="row-live-token" class="form-row server-dependent">
 		<label for="node-input-liveChatTokenConfig">
 			<i class="fa fa-commenting-o"></i>
 			<span data-i18n="rocketchat-close.label.liveChatTokenConfig"></span>
 		</label>
 		<input type="text" id="node-input-liveChatTokenConfig" style="width: 70%;" data-i18n="[placeholder]rocketchat-close.label.liveChatTokenConfig">
+	</div>
+	<div id="row-live-all-time" class="form-row server-dependent">
+		<label for="node-input-liveTimeConfig">
+			<i class="fa fa-commenting-o"></i>
+			<span data-i18n="rocketchat-close.label.liveTimeConfig"></span>
+		</label>
+		<input type="text" id="node-input-liveTimeConfig" style="width: 70%;" data-i18n="[placeholder]rocketchat-close.label.liveTimeConfig">
 	</div>
 </script>
 
@@ -31,8 +39,18 @@
 			name: { value: '' },
 			server: { value: '', type: 'rocketchat-server' },
 			destination: { value: 'live' },
-			liveChatTokenConfig: { value: '', validate: RED.validators.typedInput('liveChatTokenConfigType') },
+			liveChatTokenConfig: {
+				value: '',
+				validate: RED.validators.typedInput('liveChatTokenConfigType'),
+				required: false,
+			},
 			liveChatTokenConfigType: { value: 'str' },
+			liveTimeConfig: {
+				value: '',
+				validate: RED.validators.typedInput('liveTimeConfigType'),
+				required: false,
+			},
+			liveTimeConfigType: { value: 'str' },
 		},
 		inputs: 1,
 		outputs: 1,
@@ -51,6 +69,21 @@
 					$('.server-dependent').show();
 				}
 			});
+			$('#node-input-destination').change(function () {
+				const origin = $(this).val();
+				$('#row-live-token').hide();
+				$('#row-live-all-time').hide();
+				switch (origin) {
+					case 'live':
+						$('#row-live-token').show();
+						break;
+					case 'live-all':
+						$('#row-live-all-time').show();
+						break;
+					default:
+						break;
+				}
+			});
 
 			$('#node-input-liveChatTokenConfig').typedInput({
 				default: node.liveChatTokenConfigType || 'str',
@@ -58,6 +91,13 @@
 			});
 			$('#node-input-liveChatTokenConfig').typedInput('value', node.liveChatTokenConfig);
 			$('#node-input-liveChatTokenConfig').typedInput('type', node.liveChatTokenConfigType);
+
+			$('#node-input-liveTimeConfig').typedInput({
+				default: node.liveTimeConfigType || 'str',
+				types: ['msg', 'flow', 'global', 'env', 'str'],
+			});
+			$('#node-input-liveTimeConfig').typedInput('value', node.liveTimeConfig);
+			$('#node-input-liveTimeConfig').typedInput('type', node.liveTimeConfigType);
 		},
 		oneditsave: function () {
 			const node = this;
