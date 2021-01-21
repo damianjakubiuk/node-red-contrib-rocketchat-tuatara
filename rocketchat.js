@@ -1,4 +1,6 @@
 const axios = require('axios');
+const request = require('request');
+const Stream = require('stream');
 
 module.exports = ({ host, user, token }) => ({
 	async spotlight(query) {
@@ -265,5 +267,64 @@ module.exports = ({ host, user, token }) => ({
 			},
 		});
 		return data;
+	},
+	downloadAndUploadFile({ rid, uri, msg }) {
+		return new Promise((resolve, reject) => {
+			try {
+				const transformStream = new Stream.Transform({
+					transform: function (chunk, encoding, done) {
+						this.push(chunk, encoding);
+						done();
+					},
+				});
+				const getRequest = request.get(uri);
+				getRequest.pipe(transformStream);
+				const bufs = [];
+				transformStream.on('data', (d) => {
+					bufs.push(d);
+				});
+				transformStream.on('end', () => {
+					const buf = Buffer.concat(bufs);
+					const req = request.post(
+						`${host}/api/v1/rooms.upload/${rid}`,
+						{
+							headers: {
+								'X-Auth-Token': token,
+								'X-User-Id': user,
+							},
+						},
+						(error, _resp, body) => {
+							if (error) {
+								reject(error);
+							} else {
+								try {
+									const result = JSON.parse(body);
+									if (result.success) {
+										resolve(result);
+									} else {
+										reject(result);
+									}
+								} catch (error) {
+									reject({
+										error,
+										body,
+									});
+								}
+							}
+						}
+					);
+					const form = req.form();
+					const fileName = /[^/]*$/.exec(uri)[0] || new Date().getTime().toString();
+					const contentType = getRequest.response.headers['content-type'];
+					form.append('file', buf, {
+						filename: fileName,
+						contentType,
+					});
+					form.append('msg', msg);
+				});
+			} catch (error) {
+				reject(error);
+			}
+		});
 	},
 });
