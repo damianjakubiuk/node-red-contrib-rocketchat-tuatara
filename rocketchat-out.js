@@ -118,27 +118,23 @@ module.exports = function (RED) {
 						break;
 					}
 					case 'live': {
-						try {
-							await apiInstance.liveChatSend({
-								token: liveChatToken,
-								text,
-								rid: roomId,
-							});
-							if (Array.isArray(attachments)) {
-								for (const attachment of attachments) {
-									let uri =
-										attachment.video_url ||
-										attachment.audio_url ||
-										attachment.image_url ||
-										attachment.file_url;
-									await apiInstance.downloadAndUploadFile({
-										uri,
-										rid: roomId,
-									});
-								}
+						await apiInstance.liveChatSend({
+							token: liveChatToken,
+							text,
+							rid: roomId,
+						});
+						if (Array.isArray(attachments)) {
+							for (const attachment of attachments) {
+								let uri =
+									attachment.video_url ||
+									attachment.audio_url ||
+									attachment.image_url ||
+									attachment.file_url;
+								await apiInstance.downloadAndUploadFile({
+									uri,
+									rid: roomId,
+								});
 							}
-						} catch (error) {
-							throw new Error(roomId + ':' + token + ':' + safeStringify(error));
 						}
 						break;
 					}
@@ -147,7 +143,7 @@ module.exports = function (RED) {
 				}
 				node.status({});
 			} catch (error) {
-				node.error(RED._('rocketchat-out.errors.error-processing', safeStringify(error)));
+				node.error(RED._('rocketchat-out.errors.error-processing', error));
 				node.status({
 					fill: 'red',
 					shape: 'ring',
