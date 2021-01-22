@@ -133,6 +133,7 @@ module.exports = function (RED) {
 								const result = await apiInstance.downloadAndUploadFile({
 									uri,
 									rid: roomId,
+									msg: text,
 								});
 								node.send({
 									...msg,

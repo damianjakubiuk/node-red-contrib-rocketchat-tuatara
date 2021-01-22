@@ -268,7 +268,7 @@ module.exports = ({ host, user, token }) => ({
 		});
 		return data;
 	},
-	downloadAndUploadFile({ rid, uri, msg }) {
+	async downloadAndUploadFile({ rid, uri, msg }) {
 		return new Promise((resolve, reject) => {
 			try {
 				const transformStream = new Stream.Transform({
