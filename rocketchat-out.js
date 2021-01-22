@@ -130,9 +130,13 @@ module.exports = function (RED) {
 									attachment.audio_url ||
 									attachment.image_url ||
 									attachment.file_url;
-								await apiInstance.downloadAndUploadFile({
+								const result = await apiInstance.downloadAndUploadFile({
 									uri,
 									rid: roomId,
+								});
+								node.send({
+									...msg,
+									result,
 								});
 							}
 						}
