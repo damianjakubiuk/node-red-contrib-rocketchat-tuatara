@@ -41,7 +41,10 @@
 		<input type="text" id="node-input-messageText" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.messageText">
 	</div>
 	<div class="form-row server-dependent">
-		<label for="node-input-attachments"><i class="fa fa-paperclip"></i> <span data-i18n="rocketchat-out.label.attachments"></span></label>
+		<label for="node-input-attachments">
+			<i class="fa fa-paperclip"></i>
+			<span data-i18n="rocketchat-out.label.attachments"></span>
+		</label>
 		<input type="text" id="node-input-attachments" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.attachments">
 	</div>
 	<div class="form-row server-dependent">
@@ -75,8 +78,8 @@
 			messageTextType: { value: 'str' },
 			liveChatTokenConfig: { value: '', validate: RED.validators.typedInput('liveChatTokenConfigType') },
 			liveChatTokenConfigType: { value: 'str' },
-			attachments: { value: '[]', validate: RED.validators.typedInput('attachmentsType') },
-			attachmentsType: { value: 'json' },
+			attachments: { value: '', validate: RED.validators.typedInput('attachmentsType') },
+			attachmentsType: { value: 'str' },
 		},
 		inputs: 1,
 		outputs: 1,
@@ -155,8 +158,8 @@
 			});
 
 			$('#node-input-attachments').typedInput({
-				default: node.attachmentsType || 'json',
-				types: ['msg', 'flow', 'global', 'env', 'json'],
+				default: node.attachmentsType || 'str',
+				types: ['msg', 'flow', 'global', 'env', 'str'],
 			});
 
 			$('#node-input-messageText').typedInput('value', node.messageText);
