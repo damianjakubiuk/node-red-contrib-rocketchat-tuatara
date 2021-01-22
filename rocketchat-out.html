@@ -79,7 +79,7 @@
 			liveChatTokenConfig: { value: '', validate: RED.validators.typedInput('liveChatTokenConfigType') },
 			liveChatTokenConfigType: { value: 'str' },
 			attachments: { value: '', validate: RED.validators.typedInput('attachmentsType') },
-			attachmentsType: { value: 'str' },
+			attachmentsType: { value: 'msg' },
 		},
 		inputs: 1,
 		outputs: 1,
@@ -158,8 +158,8 @@
 			});
 
 			$('#node-input-attachments').typedInput({
-				default: node.attachmentsType || 'str',
-				types: ['msg', 'flow', 'global', 'env', 'str'],
+				default: node.attachmentsType || 'msg',
+				types: ['msg', 'flow', 'global', 'env', 'msg'],
 			});
 
 			$('#node-input-messageText').typedInput('value', node.messageText);
