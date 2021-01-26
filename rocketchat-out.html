@@ -82,7 +82,7 @@
 			attachmentsType: { value: 'msg' },
 		},
 		inputs: 1,
-		outputs: 1,
+		outputs: 0,
 		icon: 'rocketchat.png',
 		align: 'right',
 		label: function () {
@@ -159,7 +159,7 @@
 
 			$('#node-input-attachments').typedInput({
 				default: node.attachmentsType || 'msg',
-				types: ['msg', 'flow', 'global', 'env', 'msg'],
+				types: ['msg', 'flow', 'global', 'env'],
 			});
 
 			$('#node-input-messageText').typedInput('value', node.messageText);
