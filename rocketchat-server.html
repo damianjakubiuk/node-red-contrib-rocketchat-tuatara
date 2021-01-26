@@ -15,6 +15,14 @@
 		<label for="node-config-input-token"><i class="fa fa-tasks"></i> <span data-i18n="rocketchat-server.label.token"></label>
 		<input type="text" id="node-config-input-token" data-i18n="[placeholder]rocketchat-server.label.token">
 	</div>
+		<div class="form-row">
+		<label for="node-config-input-department"><i class="fa fa-tasks"></i> <span data-i18n="rocketchat-server.label.department"></label>
+		<input type="text" id="node-config-input-department" data-i18n="[placeholder]rocketchat-server.label.department">
+	</div>
+	<div class="form-row">
+		<label for="node-config-input-queueDepartment"><i class="fa fa-tasks"></i> <span data-i18n="rocketchat-server.label.queueDepartment"></label>
+		<input type="text" id="node-config-input-queueDepartment" data-i18n="[placeholder]rocketchat-server.label.queueDepartment">
+	</div>
 </script>
 
 <script type="text/javascript">
@@ -24,10 +32,12 @@
 			name: { value: '', required: true },
 			host: { value: '', required: true },
 			user: { value: '', required: true },
-			token: { value: '', required: true }
+			token: { value: '', required: true },
+			department: { value: '', required: false },
+			queueDepartment: { value: '', required: false },
 		},
-		label: function() {
+		label: function () {
 			return this.name || this.user + '@' + this.host;
-		}
+		},
 	});
 </script>

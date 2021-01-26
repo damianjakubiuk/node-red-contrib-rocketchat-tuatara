@@ -5,12 +5,17 @@
 			"server": "Server",
 			"origin": "Origin type",
 			"room": "Room",
+			"liveChatTokenConfig": "Live-chat Token",
 			"autocomplete": "Find",
-			"receiving": "Receiving..."
+			"receiving": "Receiving...",
+			"retries": "Reconnect retries",
+			"max-retries": "Max reconnect retries",
+			"retries-interval": "Reconnect retries clear interval"
 		},
 		"origins": {
 			"user": "User",
-			"room": "Room"
+			"room": "Room",
+			"live": "Live-chat"
 		},
 		"errors": {
 			"invalid-data": "Input data is missing",

@@ -1,0 +1,14 @@
+{
+	"rocketchat-custom-field": {
+		"label": {
+			"server": "Server",
+			"liveChatTokenConfig": "Live-chat Token",
+			"customFields": "Object with a key-value set of custom fields",
+			"sending": "Sending..."
+		},
+		"errors": {
+			"invalid-data": "Input data is missing",
+			"error-processing": "Errors processing request: __message__"
+		}
+	}
+}

@@ -12,6 +12,7 @@
 		<select id="node-input-destination" style="width: 70%">
 			<option value="users" data-i18n="rocketchat-out.destinations.users"></option>
 			<option value="rooms" data-i18n="rocketchat-out.destinations.rooms"></option>
+			<option value="live" data-i18n="rocketchat-out.destinations.live"></option>
 		</select>
 	</div>
 	<div class="form-row server-dependent">
@@ -40,8 +41,18 @@
 		<input type="text" id="node-input-messageText" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.messageText">
 	</div>
 	<div class="form-row server-dependent">
-		<label for="node-input-attachments"><i class="fa fa-paperclip"></i> <span data-i18n="rocketchat-out.label.attachments"></span></label>
+		<label for="node-input-attachments">
+			<i class="fa fa-paperclip"></i>
+			<span data-i18n="rocketchat-out.label.attachments"></span>
+		</label>
 		<input type="text" id="node-input-attachments" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.attachments">
+	</div>
+	<div class="form-row server-dependent">
+		<label for="node-input-liveChatTokenConfig">
+			<i class="fa fa-commenting-o"></i>
+			<span data-i18n="rocketchat-out.label.liveChatTokenConfig"></span>
+		</label>
+		<input type="text" id="node-input-liveChatTokenConfig" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.liveChatTokenConfig">
 	</div>
 </script>
 
@@ -65,19 +76,21 @@
 			emojiTextType: { value: 'str' },
 			messageText: { value: '', validate: RED.validators.typedInput('messageTextType') },
 			messageTextType: { value: 'str' },
-			attachments: { value: '[]', validate: RED.validators.typedInput('attachmentsType') },
-			attachmentsType: { value: 'json' }
+			liveChatTokenConfig: { value: '', validate: RED.validators.typedInput('liveChatTokenConfigType') },
+			liveChatTokenConfigType: { value: 'str' },
+			attachments: { value: '', validate: RED.validators.typedInput('attachmentsType') },
+			attachmentsType: { value: 'msg' },
 		},
 		inputs: 1,
 		outputs: 0,
 		icon: 'rocketchat.png',
 		align: 'right',
-		label: function() {
+		label: function () {
 			return this.name || 'Rocket․Chat Sender';
 		},
-		oneditprepare: function() {
+		oneditprepare: function () {
 			const node = this;
-			$('#node-input-server').change(function() {
+			$('#node-input-server').change(function () {
 				const server = $(this).val();
 				if (server === '_ADD_') {
 					$('.server-dependent').hide();
@@ -96,11 +109,11 @@
 						{
 							value: 'form',
 							label: node._('rocketchat-out.label.autocomplete'),
-							hasValue: false
-						}
-					]
+							hasValue: false,
+						},
+					],
 				})
-				.change(function() {
+				.change(function () {
 					var type = $(this).typedInput('type');
 					if (type === 'form') {
 						$('#room-autocomplete-row').show();
@@ -111,41 +124,48 @@
 				});
 
 			$('#node-input-room-autocomplete').autocomplete({
-				source: function(request, response) {
+				source: function (request, response) {
 					const server = $('#node-input-server').val();
 					$.ajax({
 						url: 'rocketchat-server/' + server + '/spotlight/' + request.term,
 						type: 'GET',
 						dataType: 'json',
-						success: options => {
+						success: (options) => {
 							const destination = $('#node-input-destination').val() || 'users';
 							return response(
-								(options[destination] || []).map(opt => ({
+								(options[destination] || []).map((opt) => ({
 									id: destination === 'users' ? opt.username : opt._id,
-									value: opt.name
+									value: opt.name,
 								}))
 							);
-						}
+						},
 					});
 				},
 				minLength: 2,
-				select: function(event, ui) {
+				select: function (event, ui) {
 					$('#node-input-room-autocomplete-id').val(ui.item.id);
-				}
+				},
 			});
 
 			$('#node-input-messageText').typedInput({
 				default: node.messageTextType || 'str',
-				types: ['msg', 'flow', 'global', 'env', 'str']
+				types: ['msg', 'flow', 'global', 'env', 'str'],
+			});
+
+			$('#node-input-liveChatTokenConfig').typedInput({
+				default: node.liveChatTokenConfigType || 'str',
+				types: ['msg', 'flow', 'global', 'env', 'str'],
 			});
 
 			$('#node-input-attachments').typedInput({
-				default: node.attachmentsType || 'json',
-				types: ['msg', 'flow', 'global', 'env', 'json']
+				default: node.attachmentsType || 'msg',
+				types: ['msg', 'flow', 'global', 'env'],
 			});
 
 			$('#node-input-messageText').typedInput('value', node.messageText);
 			$('#node-input-messageText').typedInput('type', node.messageTextType);
+			$('#node-input-liveChatTokenConfig').typedInput('value', node.liveChatTokenConfig);
+			$('#node-input-liveChatTokenConfig').typedInput('type', node.liveChatTokenConfigType);
 			$('#node-input-aliasText').typedInput('value', node.aliasText);
 			$('#node-input-aliasText').typedInput('type', node.aliasTextType);
 			$('#node-input-avatarText').typedInput('value', node.avatarText);
@@ -161,10 +181,11 @@
 				$('#node-input-room-autocomplete-id').val(i);
 			}
 		},
-		oneditsave: function() {
+		oneditsave: function () {
 			const node = this;
 			node.roomType = $('#node-input-room').typedInput('type');
 			node.messageTextType = $('#node-input-messageText').typedInput('type');
+			node.liveChatTokenConfigType = $('#node-input-liveChatTokenConfig').typedInput('type');
 			node.aliasTextType = $('#node-input-aliasText').typedInput('type');
 			node.avatarTextType = $('#node-input-avatarText').typedInput('type');
 			node.emojiTextType = $('#node-input-emojiText').typedInput('type');
@@ -172,11 +193,11 @@
 			if (node.roomType === 'form') {
 				node.roomData = JSON.stringify({
 					i: $('#node-input-room-autocomplete-id').val(),
-					l: $('#node-input-room-autocomplete').val()
+					l: $('#node-input-room-autocomplete').val(),
 				});
 			} else {
 				node.roomData = '{}';
 			}
-		}
+		},
 	});
 </script>
