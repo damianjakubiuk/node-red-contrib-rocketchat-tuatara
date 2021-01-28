@@ -68,7 +68,7 @@ module.exports = function (RED) {
 			);
 			if (roomId == null) {
 				try {
-					if (config.destination === 'live') {
+					if (config.destination === 'live' || config.destination === 'chatbot_response') {
 						const getLiveChatRoomsResponse = await apiInstance.getLiveChatRooms({
 							visitorToken: liveChatToken,
 						});
@@ -114,6 +114,13 @@ module.exports = function (RED) {
 							alias,
 							avatar,
 							emoji,
+						});
+						break;
+					}
+					case 'chatbot_response': {
+						await apiInstance.sendMessage({
+							rid: roomId,
+							msg: text,
 						});
 						break;
 					}
