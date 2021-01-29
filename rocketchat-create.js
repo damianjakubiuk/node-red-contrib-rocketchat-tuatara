@@ -104,6 +104,7 @@ module.exports = function (RED) {
 							});
 							let room;
 							let newRoom = false;
+							let setCustomField;
 							if (getLiveChatRoomsResponse.rooms.length >= 1) {
 								room = getLiveChatRoomsResponse.rooms[0];
 								await apiInstance.closeVisitorLiveChatRooms({
@@ -117,17 +118,17 @@ module.exports = function (RED) {
 								});
 								room = createLiveChatRoomResponse.room;
 								newRoom = true;
+								setCustomField = await apiInstance.setCustomField({
+									token: liveChatToken,
+									key: 'token',
+									value: liveChatToken,
+									overwrite: true,
+								});
+								await apiInstance.transferRoom({
+									rid: room._id,
+									department: queueDepartment,
+								});
 							}
-							const setCustomField = await apiInstance.setCustomField({
-								token: liveChatToken,
-								key: 'token',
-								value: liveChatToken,
-								overwrite: true,
-							});
-							await apiInstance.transferRoom({
-								rid: room._id,
-								department: queueDepartment,
-							});
 							const { officeHours } = await apiInstance.getOfficeHours();
 							config.room = room;
 							config.room_id = room._id;
