@@ -41,6 +41,21 @@ module.exports = ({ host, user, token }) => ({
 		);
 		return data;
 	},
+	async sendMessage({ rid, msg }) {
+		const { data } = await axios.post(
+			`${host}/api/v1/chat.sendMessage`,
+			{
+				message: { rid, msg },
+			},
+			{
+				headers: {
+					'X-Auth-Token': token,
+					'X-User-Id': user,
+				},
+			}
+		);
+		return data;
+	},
 	async getSubscriptions() {
 		const { data } = await axios.get(`${host}/api/v1/subscriptions.get`, {
 			headers: {

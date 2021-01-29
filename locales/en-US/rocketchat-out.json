@@ -17,7 +17,8 @@
 		"destinations": {
 			"users": "User",
 			"rooms": "Room",
-			"live": "Live-chat"
+			"live": "Live-chat",
+			"chatbot_response": "Chatbot response"
 		},
 		"errors": {
 			"invalid-data": "Input data is missing: __message__",
