@@ -40,27 +40,6 @@
 		</label>
 		<input type="text" id="node-input-liveChatSessionConfig" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.liveChatSessionConfig">
 	</div>
-	<div id="row-retries" class="form-row server-dependent" style="display: none;">
-		<label for="node-max-retries">
-			<i class="fa fa-hashtag"></i>
-			<span data-i18n="rocketchat-in.label.retries"></span>
-		</label>
-		<input type="number" id="node-input-retries" style="width: 70%;" data-i18n="[placeholder]rocketchat-in.label.retries" />
-	</div>
-	<div id="row-maxRetries" class="form-row server-dependent" style="display: none;">
-		<label for="node-max-retries">
-			<i class="fa fa-hashtag"></i>
-			<span data-i18n="rocketchat-in.label.max-retries"></span>
-		</label>
-		<input type="number" id="node-input-maxRetries" style="width: 70%;" data-i18n="[placeholder]rocketchat-in.label.max-retries" />
-	</div>
-	<div id="row-retriesInterval" class="form-row server-dependent" style="display: none;">
-		<label for="node-retries-interval">
-			<i class="fa fa-hashtag"></i>
-			<span data-i18n="rocketchat-in.label.retries-interval"></span>
-		</label>
-		<input type="number" id="node-input-retriesInterval" style="width: 70%;" data-i18n="[placeholder]rocketchat-in.label.retries-interval" />
-	</div>
 </script>
 
 <script type="text/javascript">
@@ -79,9 +58,6 @@
 			liveChatTokenConfigType: { value: 'str' },
 			liveChatSessionConfig: { value: '', validate: RED.validators.typedInput('liveChatSessionConfigType') },
 			liveChatSessionConfigType: { value: 'str' },
-			retries: { value: 3, type: 'num' },
-			maxRetries: { value: 15, type: 'num' },
-			retriesInterval: { value: 60000, type: 'num' },
 		},
 		inputs: 1,
 		outputs: 1,
@@ -182,21 +158,6 @@
 				$('#node-input-room-autocomplete').val(l);
 				$('#node-input-room-autocomplete-id').val(i);
 			}
-			$('#node-input-retries').typedInput({
-				default: 'num',
-				types: ['num'],
-			});
-			$('#node-input-retries').typedInput('value', node.retries);
-			$('#node-input-maxRetries').typedInput({
-				default: 'num',
-				types: ['num'],
-			});
-			$('#node-input-maxRetries').typedInput('value', node.maxRetries);
-			$('#node-input-retriesInterval').typedInput({
-				default: 'num',
-				types: ['num'],
-			});
-			$('#node-input-retriesInterval').typedInput('value', node.retriesInterval);
 		},
 		oneditsave: function () {
 			const node = this;
