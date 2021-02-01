@@ -24,9 +24,6 @@ module.exports = function (RED) {
 					liveChatSessionConfig,
 					liveChatSessionConfigType,
 				} = config;
-				const retries = +config.retries;
-				const maxRetries = +config.maxRetries;
-				const retriesInterval = +config.retriesInterval;
 
 				if (node.server == null) {
 					node.status({ fill: 'red', shape: 'ring', text: 'rocketchat-in.errors.invalid-data' });
@@ -64,8 +61,6 @@ module.exports = function (RED) {
 					this,
 					msg
 				);
-
-				let numberOfTries = 0;
 
 				const apiInstance = api({ host: configHost, user, token });
 
@@ -134,15 +129,6 @@ module.exports = function (RED) {
 				};
 
 				const startListening = () => {
-					if (numberOfTries > retries) {
-						if (numberOfTries < maxRetries) {
-							setTimeout(startListening, 10000);
-						}
-						numberOfTries++;
-						return;
-					} else {
-						numberOfTries++;
-					}
 					try {
 						processUnreadMessages();
 
@@ -244,7 +230,6 @@ module.exports = function (RED) {
 							clearInterval(ws.pingInterval);
 							node.warn(RED._('rocketchat-in.errors.connection-broken'));
 							ws.terminate();
-							setTimeout(startListening, 10000);
 						});
 
 						// Safelly handle ws errors so it doesn't break the application
@@ -336,11 +321,6 @@ module.exports = function (RED) {
 				};
 
 				startListening();
-				setInterval(() => {
-					if (numberOfTries > 0) {
-						numberOfTries--;
-					}
-				}, retriesInterval);
 			} catch (error) {
 				node.error(RED._('rocketchat-in.errors.error-processing', error));
 			}
