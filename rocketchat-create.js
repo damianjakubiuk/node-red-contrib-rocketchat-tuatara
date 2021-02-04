@@ -88,7 +88,7 @@ module.exports = function (RED) {
 							});
 							await apiInstance.transferVisitorRooms({
 								token: liveChatToken,
-								department: department,
+								department: msg.payload.department || department,
 							});
 						} else {
 							await apiInstance.createLiveChatVisitor({
@@ -126,7 +126,7 @@ module.exports = function (RED) {
 								});
 								await apiInstance.transferRoom({
 									rid: room._id,
-									department: queueDepartment,
+									department: msg.payload.queueDepartment || queueDepartment,
 								});
 							}
 							const { officeHours } = await apiInstance.getOfficeHours();
