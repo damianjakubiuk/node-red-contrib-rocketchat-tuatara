@@ -125,10 +125,12 @@ module.exports = function (RED) {
 								value: liveChatToken,
 								overwrite: true,
 							});
-							await apiInstance.transferRoom({
-								rid: room._id,
-								department: msg.payload.queueDepartment || queueDepartment,
-							});
+							if (room.usersCount < 2) {
+								await apiInstance.transferRoom({
+									rid: room._id,
+									department: msg.payload.queueDepartment || queueDepartment,
+								});
+							}
 							const { officeHours } = await apiInstance.getOfficeHours();
 							config.room = room;
 							config.room_id = room._id;
