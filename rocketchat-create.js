@@ -91,11 +91,6 @@ module.exports = function (RED) {
 								department: msg.payload.department || department,
 							});
 						} else {
-							await apiInstance.createLiveChatVisitor({
-								name: liveChatName,
-								email: liveChatEmail,
-								token: liveChatToken,
-							});
 							const { success, config } = await apiInstance.getLiveChatConfig({
 								token: liveChatToken,
 							});
@@ -111,21 +106,30 @@ module.exports = function (RED) {
 									token: liveChatToken,
 									except: [room._id],
 								});
+								if (!msg.payload.whatsapp) {
+									await apiInstance.transferRoom({
+										rid: room._id,
+										department: msg.payload.queueDepartment || queueDepartment,
+									});
+								}
 							} else {
+								await apiInstance.createLiveChatVisitor({
+									name: liveChatName,
+									email: liveChatEmail,
+									token: liveChatToken,
+								});
 								let createLiveChatRoomResponse = await apiInstance.createLiveChatRoom({
 									token: liveChatToken,
 									rid: name,
 								});
 								room = createLiveChatRoomResponse.room;
 								newRoom = true;
-							}
-							setCustomField = await apiInstance.setCustomField({
-								token: liveChatToken,
-								key: 'token',
-								value: liveChatToken,
-								overwrite: true,
-							});
-							if (room.usersCount < 2) {
+								setCustomField = await apiInstance.setCustomField({
+									token: liveChatToken,
+									key: 'token',
+									value: liveChatToken,
+									overwrite: true,
+								});
 								await apiInstance.transferRoom({
 									rid: room._id,
 									department: msg.payload.queueDepartment || queueDepartment,
