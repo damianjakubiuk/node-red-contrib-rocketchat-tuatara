@@ -13,6 +13,7 @@ module.exports = function (RED) {
 		node.server = RED.nodes.getNode(config.server);
 
 		node.on('input', async function (msg) {
+			const initialMessage = msg;
 			try {
 				const {
 					origin,
@@ -83,7 +84,8 @@ module.exports = function (RED) {
 												} = message;
 												if (fromUser !== user) {
 													node.send({
-														...msg,
+														...initialMessage,
+														initialMessage,
 														payload: message,
 													});
 												}
@@ -111,7 +113,8 @@ module.exports = function (RED) {
 										} = message;
 										if (fromUser !== user) {
 											node.send({
-												...msg,
+												...initialMessage,
+												initialMessage,
 												payload: message,
 											});
 										}
@@ -278,7 +281,8 @@ module.exports = function (RED) {
 												if (origin === 'live') {
 													if (token !== liveChatToken) {
 														node.send({
-															...msg,
+															...initialMessage,
+															initialMessage,
 															roomId: roomId,
 															token: liveChatToken,
 															payload: message,
@@ -293,7 +297,8 @@ module.exports = function (RED) {
 												} else {
 													if (fromUser !== user) {
 														node.send({
-															...msg,
+															...initialMessage,
+															initialMessage,
 															payload: message,
 														});
 													}
