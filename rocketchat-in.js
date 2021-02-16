@@ -83,6 +83,7 @@ module.exports = function (RED) {
 												} = message;
 												if (fromUser !== user) {
 													node.send({
+														...msg,
 														payload: message,
 													});
 												}
@@ -110,6 +111,7 @@ module.exports = function (RED) {
 										} = message;
 										if (fromUser !== user) {
 											node.send({
+												...msg,
 												payload: message,
 											});
 										}
@@ -276,6 +278,7 @@ module.exports = function (RED) {
 												if (origin === 'live') {
 													if (token !== liveChatToken) {
 														node.send({
+															...msg,
 															roomId: roomId,
 															token: liveChatToken,
 															payload: message,
@@ -290,6 +293,7 @@ module.exports = function (RED) {
 												} else {
 													if (fromUser !== user) {
 														node.send({
+															...msg,
 															payload: message,
 														});
 													}
