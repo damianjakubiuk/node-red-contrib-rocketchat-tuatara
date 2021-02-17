@@ -90,6 +90,7 @@ module.exports = function (RED) {
 								token: liveChatToken,
 								department: msg.payload.department || department,
 							});
+							processResponse(true, msg.payload);
 						} else {
 							const { success, config } = await apiInstance.getLiveChatConfig({
 								token: liveChatToken,
