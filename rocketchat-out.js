@@ -35,6 +35,8 @@ module.exports = function (RED) {
 			emojiTextType,
 			attachments: configAttachments,
 			attachmentsType,
+			attachmentsHeaders: configAttachmentsHeaders,
+			attachmentsHeadersType,
 			room,
 			roomType,
 			roomData,
@@ -60,6 +62,19 @@ module.exports = function (RED) {
 			const emoji = RED.util.evaluateNodeProperty(emojiText, emojiTextType, this, msg);
 			const text = RED.util.evaluateNodeProperty(messageText, messageTextType, this, msg);
 			const attachments = RED.util.evaluateNodeProperty(configAttachments, attachmentsType, this, msg);
+			let attachmentsHeaders = RED.util.evaluateNodeProperty(
+				configAttachmentsHeaders,
+				attachmentsHeadersType,
+				this,
+				msg
+			);
+			if (attachmentsHeaders) {
+				try {
+					attachmentsHeaders = JSON.parse(attachmentsHeaders);
+				} catch (error) {
+					attachmentsHeaders = undefined;
+				}
+			}
 			const liveChatToken = RED.util.evaluateNodeProperty(
 				liveChatTokenConfig,
 				liveChatTokenConfigType,
@@ -141,6 +156,7 @@ module.exports = function (RED) {
 									uri,
 									rid: roomId,
 									msg: text,
+									headers: attachmentsHeaders,
 								});
 							}
 						}

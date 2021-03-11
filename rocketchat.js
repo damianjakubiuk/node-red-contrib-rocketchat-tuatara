@@ -283,7 +283,7 @@ module.exports = ({ host, user, token }) => ({
 		});
 		return data;
 	},
-	async downloadAndUploadFile({ rid, uri, msg }) {
+	async downloadAndUploadFile({ rid, uri, msg, headers = {} }) {
 		return new Promise((resolve, reject) => {
 			try {
 				const transformStream = new Stream.Transform({
@@ -292,7 +292,9 @@ module.exports = ({ host, user, token }) => ({
 						done();
 					},
 				});
-				const getRequest = request.get(uri);
+				const getRequest = request.get(uri, {
+					headers,
+				});
 				getRequest.pipe(transformStream);
 				const bufs = [];
 				transformStream.on('data', (d) => {
