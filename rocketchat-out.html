@@ -49,6 +49,13 @@
 		<input type="text" id="node-input-attachments" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.attachments">
 	</div>
 	<div class="form-row server-dependent">
+		<label for="node-input-attachmentsHeaders">
+			<i class="fa fa-paperclip"></i>
+			<span data-i18n="rocketchat-out.label.attachmentsHeaders"></span>
+		</label>
+		<input type="text" id="node-input-attachmentsHeaders" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.attachmentsHeaders">
+	</div>
+	<div class="form-row server-dependent">
 		<label for="node-input-liveChatTokenConfig">
 			<i class="fa fa-commenting-o"></i>
 			<span data-i18n="rocketchat-out.label.liveChatTokenConfig"></span>
@@ -81,6 +88,12 @@
 			liveChatTokenConfigType: { value: 'str' },
 			attachments: { value: '', validate: RED.validators.typedInput('attachmentsType') },
 			attachmentsType: { value: 'msg' },
+			attachmentsHeaders: {
+				value: '',
+				validate: RED.validators.typedInput('attachmentsHeadersType'),
+				required: false,
+			},
+			attachmentsHeadersType: { value: 'json' },
 		},
 		inputs: 1,
 		outputs: 0,
@@ -163,6 +176,12 @@
 				types: ['msg', 'flow', 'global', 'env'],
 			});
 
+			$('#node-input-attachmentsHeaders').typedInput({
+				default: node.attachmentsHeadersType || 'json',
+				type: 'json',
+				types: ['json'],
+			});
+
 			$('#node-input-messageText').typedInput('value', node.messageText);
 			$('#node-input-messageText').typedInput('type', node.messageTextType);
 			$('#node-input-liveChatTokenConfig').typedInput('value', node.liveChatTokenConfig);
@@ -175,6 +194,8 @@
 			$('#node-input-emojiText').typedInput('type', node.emojiTextType);
 			$('#node-input-attachments').typedInput('value', node.attachments);
 			$('#node-input-attachments').typedInput('type', node.attachmentsType);
+			$('#node-input-attachmentsHeaders').typedInput('value', node.attachmentsHeaders);
+			$('#node-input-attachmentsHeaders').typedInput('type', node.attachmentsHeadersType);
 
 			if (node.roomType === 'form') {
 				const { i, l } = JSON.parse(node.roomData);
@@ -191,6 +212,7 @@
 			node.avatarTextType = $('#node-input-avatarText').typedInput('type');
 			node.emojiTextType = $('#node-input-emojiText').typedInput('type');
 			node.attachmentsType = $('#node-input-attachments').typedInput('type');
+			node.attachmentsHeadersType = $('#node-input-attachmentsHeaders').typedInput('type');
 			if (node.roomType === 'form') {
 				node.roomData = JSON.stringify({
 					i: $('#node-input-room-autocomplete-id').val(),
