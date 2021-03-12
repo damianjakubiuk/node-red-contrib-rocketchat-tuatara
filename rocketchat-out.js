@@ -140,25 +140,43 @@ module.exports = function (RED) {
 						break;
 					}
 					case 'live': {
-						await apiInstance.liveChatSend({
-							token: liveChatToken,
-							text,
-							rid: roomId,
-						});
-						if (Array.isArray(attachments)) {
+						if (Array.isArray(attachments) && attachments.length >= 1) {
+							await apiInstance.sendMessage({
+								rid: roomId,
+								msg: text,
+							});
 							for (const attachment of attachments) {
 								let uri =
 									attachment.video_url ||
 									attachment.audio_url ||
 									attachment.image_url ||
 									attachment.file_url;
-								await apiInstance.downloadAndUploadFile({
-									uri,
-									rid: roomId,
-									msg: text,
-									headers: attachmentsHeaders,
-								});
+								try {
+									await apiInstance.downloadAndUploadFile({
+										uri,
+										rid: roomId,
+										msg: attachment.caption || "User didn't set caption for this attachment",
+										headers: attachmentsHeaders,
+									});
+								} catch (error) {
+									let errorText;
+									if (error.errorType === 'error-invalid-file-type') {
+										errorText = 'Upload failed because of invalid file type.';
+									} else {
+										errorText = 'Upload failed.';
+									}
+									await apiInstance.sendMessage({
+										msg: errorText,
+										rid: roomId,
+									});
+								}
 							}
+						} else {
+							await apiInstance.liveChatSend({
+								token: liveChatToken,
+								text,
+								rid: roomId,
+							});
 						}
 						break;
 					}
