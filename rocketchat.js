@@ -156,9 +156,9 @@ module.exports = ({ host, user, token }) => ({
 		});
 		return data;
 	},
-	async createLiveChatVisitor({ name, email, token }) {
+	async createLiveChatVisitor({ name, email, token, department }) {
 		const { data } = await axios.post(`${host}/api/v1/livechat/visitor`, {
-			visitor: { name, email, token },
+			visitor: { name, email, token, department },
 		});
 		return data;
 	},
