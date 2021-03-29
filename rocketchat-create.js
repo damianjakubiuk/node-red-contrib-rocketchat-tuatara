@@ -118,6 +118,7 @@ module.exports = function (RED) {
 									name: liveChatName,
 									email: liveChatEmail,
 									token: liveChatToken,
+									department: msg.payload.queueDepartment || queueDepartment,
 								});
 								let createLiveChatRoomResponse = await apiInstance.createLiveChatRoom({
 									token: liveChatToken,
@@ -130,10 +131,6 @@ module.exports = function (RED) {
 									key: 'token',
 									value: liveChatToken,
 									overwrite: true,
-								});
-								await apiInstance.transferRoom({
-									rid: room._id,
-									department: msg.payload.queueDepartment || queueDepartment,
 								});
 							}
 							const { officeHours } = await apiInstance.getOfficeHours();
