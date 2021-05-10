@@ -2,6 +2,7 @@ const WebSocket = require('ws');
 const EJSON = require('ejson');
 const url = require('url');
 const api = require('./rocketchat');
+const stringifyError = require('./utils/stringifyError');
 
 module.exports = function (RED) {
 	'use strict';
@@ -124,7 +125,7 @@ module.exports = function (RED) {
 							}
 						}
 					} catch (error) {
-						node.error(RED._('rocketchat-in.errors.error-processing', error));
+						node.error(RED._('rocketchat-in.errors.error-processing', stringifyError(error)));
 						node.status({
 							fill: 'red',
 							shape: 'ring',
@@ -311,7 +312,7 @@ module.exports = function (RED) {
 										break;
 								}
 							} catch (error) {
-								node.error(RED._('rocketchat-in.errors.error-processing', error));
+								node.error(RED._('rocketchat-in.errors.error-processing', stringifyError(error)));
 								node.status({
 									fill: 'red',
 									shape: 'ring',
@@ -320,7 +321,7 @@ module.exports = function (RED) {
 							}
 						});
 					} catch (error) {
-						node.error(RED._('rocketchat-in.errors.error-processing', error));
+						node.error(RED._('rocketchat-in.errors.error-processing', stringifyError(error)));
 						node.status({
 							fill: 'red',
 							shape: 'ring',
@@ -331,7 +332,7 @@ module.exports = function (RED) {
 
 				startListening();
 			} catch (error) {
-				node.error(RED._('rocketchat-in.errors.error-processing', error));
+				node.error(RED._('rocketchat-in.errors.error-processing', stringifyError(error)));
 			}
 		});
 	}

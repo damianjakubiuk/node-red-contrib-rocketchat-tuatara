@@ -1,20 +1,5 @@
 const api = require('./rocketchat');
-
-function safeStringify(obj, indent = 2) {
-	let cache = [];
-	const retVal = JSON.stringify(
-		obj,
-		(key, value) =>
-			typeof value === 'object' && value !== null
-				? cache.includes(value)
-					? undefined // Duplicate reference found, discard key
-					: cache.push(value) && value // Store value in our collection
-				: value,
-		indent
-	);
-	cache = null;
-	return retVal;
-}
+const stringifyError = require('./utils/stringifyError');
 
 module.exports = function (RED) {
 	'use strict';
@@ -90,10 +75,6 @@ module.exports = function (RED) {
 						});
 						if (getLiveChatRoomsResponse.rooms.length >= 1) {
 							roomId = getLiveChatRoomsResponse.rooms[0]._id;
-						} else {
-							throw new Error(
-								`Invlid getLiveChatRoomsResponse: ${JSON.stringify(getLiveChatRoomsResponse)}`
-							);
 						}
 					} else {
 						throw new Error('roomId cannot be null when destination is not live');
@@ -187,7 +168,7 @@ module.exports = function (RED) {
 				}
 				node.status({});
 			} catch (error) {
-				node.error(RED._('rocketchat-out.errors.error-processing', error));
+				node.error(RED._('rocketchat-out.errors.error-processing', stringifyError(error)));
 				node.status({
 					fill: 'red',
 					shape: 'ring',

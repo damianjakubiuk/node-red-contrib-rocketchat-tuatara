@@ -1,4 +1,5 @@
 const api = require('./rocketchat');
+const stringifyError = require('./utils/stringifyError');
 
 module.exports = function (RED) {
 	'use strict';
@@ -144,14 +145,11 @@ module.exports = function (RED) {
 						}
 						break;
 					}
-
 					default:
 						throw new Error('Invalid roomType');
 				}
 			} catch (error) {
-				node.error(error);
-				node.error(error.name);
-				node.error(error.message);
+				node.error(stringifyError(error));
 				node.status({
 					fill: 'red',
 					shape: 'ring',

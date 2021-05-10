@@ -1,4 +1,5 @@
 const api = require('./rocketchat');
+const stringifyError = require('./utils/stringifyError');
 
 module.exports = function (RED) {
 	'use strict';
@@ -55,7 +56,7 @@ module.exports = function (RED) {
 									  }
 									: {},
 							};
-							node.error(error);
+							node.error(stringifyError(error));
 							node.status({
 								fill: 'red',
 								shape: 'ring',
@@ -81,7 +82,7 @@ module.exports = function (RED) {
 						customFields,
 					},
 				});
-				node.error(error);
+				node.error(stringifyError(error));
 				node.status({
 					fill: 'red',
 					shape: 'ring',
