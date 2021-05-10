@@ -12,7 +12,9 @@
 			"emoji": "Emoji",
 			"messageText": "Text",
 			"attachments": "Attachments",
-			"liveChatTokenConfig": "Live-chat Token"
+			"liveChatTokenConfig": "Live-chat Token",
+			"attachmentsHeaders" : "attachment headers",
+			"allowedFileTypes": "Allowed file types"
 		},
 		"destinations": {
 			"users": "User",
