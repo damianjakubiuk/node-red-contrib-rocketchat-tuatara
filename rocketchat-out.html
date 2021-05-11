@@ -56,13 +56,6 @@
 		<input type="text" id="node-input-attachmentsHeaders" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.attachmentsHeaders">
 	</div>
 	<div class="form-row server-dependent">
-		<label for="node-input-allowedFileTypes">
-			<i class="fa fa-paperclip"></i>
-			<span data-i18n="rocketchat-out.label.allowedFileTypes"></span>
-		</label>
-		<input type="text" id="node-input-allowedFileTypes" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.allowedFileTypes">
-	</div>
-	<div class="form-row server-dependent">
 		<label for="node-input-liveChatTokenConfig">
 			<i class="fa fa-commenting-o"></i>
 			<span data-i18n="rocketchat-out.label.liveChatTokenConfig"></span>
@@ -101,12 +94,6 @@
 				required: false,
 			},
 			attachmentsHeadersType: { value: 'json' },
-			allowedFileTypes: {
-				value: '',
-				validate: RED.validators.typedInput('allowedFileTypesType'),
-				required: false,
-			},
-			allowedFileTypesType: { value: 'json' },
 		},
 		inputs: 1,
 		outputs: 0,
@@ -195,12 +182,6 @@
 				types: ['json'],
 			});
 
-			$('#node-input-allowedFileTypes').typedInput({
-				default: node.allowedFileTypesType || 'json',
-				type: 'json',
-				types: ['json'],
-			});
-
 			$('#node-input-messageText').typedInput('value', node.messageText);
 			$('#node-input-messageText').typedInput('type', node.messageTextType);
 			$('#node-input-liveChatTokenConfig').typedInput('value', node.liveChatTokenConfig);
@@ -215,8 +196,6 @@
 			$('#node-input-attachments').typedInput('type', node.attachmentsType);
 			$('#node-input-attachmentsHeaders').typedInput('value', node.attachmentsHeaders);
 			$('#node-input-attachmentsHeaders').typedInput('type', node.attachmentsHeadersType);
-			$('#node-input-allowedFileTypes').typedInput('value', node.allowedFileTypes);
-			$('#node-input-allowedFileTypes').typedInput('type', node.allowedFileTypesType);
 
 			if (node.roomType === 'form') {
 				const { i, l } = JSON.parse(node.roomData);
@@ -234,7 +213,6 @@
 			node.emojiTextType = $('#node-input-emojiText').typedInput('type');
 			node.attachmentsType = $('#node-input-attachments').typedInput('type');
 			node.attachmentsHeadersType = $('#node-input-attachmentsHeaders').typedInput('type');
-			node.allowedFileTypesType = $('#node-input-allowedFileTypes').typedInput('type');
 			if (node.roomType === 'form') {
 				node.roomData = JSON.stringify({
 					i: $('#node-input-room-autocomplete-id').val(),

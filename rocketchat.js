@@ -1,7 +1,6 @@
 const axios = require('axios');
 const request = require('request');
 const Stream = require('stream');
-const FileType = require('file-type');
 
 module.exports = ({ host, user, token }) => ({
 	async spotlight(query) {
@@ -284,7 +283,7 @@ module.exports = ({ host, user, token }) => ({
 		});
 		return data;
 	},
-	async downloadAndUploadFile({ rid, uri, msg, headers = {}, allowedFileTypes }) {
+	async downloadAndUploadFile({ rid, uri, msg, headers = {} }) {
 		return new Promise((resolve, reject) => {
 			try {
 				const transformStream = new Stream.Transform({
@@ -301,19 +300,8 @@ module.exports = ({ host, user, token }) => ({
 				transformStream.on('data', (d) => {
 					bufs.push(d);
 				});
-				transformStream.on('end', async () => {
+				transformStream.on('end', () => {
 					const buf = Buffer.concat(bufs);
-					const fileName = /[^/]*$/.exec(uri)[0] || new Date().getTime().toString();
-					const contentType = getRequest.response.headers['content-type'];
-					if (allowedFileTypes && Array.isArray(allowedFileTypes)) {
-						const fileType = await FileType.fromBuffer(buf);
-						const mimeType = fileType ? fileType.mime : contentType;
-						if (!allowedFileTypes.includes(mimeType)) {
-							reject(new Error('File type not allowed'));
-							return;
-						}
-					}
-
 					const req = request.post(
 						`${host}/api/v1/rooms.upload/${rid}`,
 						{
@@ -343,6 +331,8 @@ module.exports = ({ host, user, token }) => ({
 						}
 					);
 					const form = req.form();
+					const fileName = /[^/]*$/.exec(uri)[0] || new Date().getTime().toString();
+					const contentType = getRequest.response.headers['content-type'];
 					form.append('file', buf, {
 						filename: fileName,
 						contentType,

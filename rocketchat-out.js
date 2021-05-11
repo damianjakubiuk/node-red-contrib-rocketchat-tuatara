@@ -22,8 +22,6 @@ module.exports = function (RED) {
 			attachmentsType,
 			attachmentsHeaders: configAttachmentsHeaders,
 			attachmentsHeadersType,
-			allowedFileTypes: configAllowedFileTypes,
-			allowedFileTypesType,
 			room,
 			roomType,
 			roomData,
@@ -55,12 +53,13 @@ module.exports = function (RED) {
 				this,
 				msg
 			);
-			let allowedFileTypes = RED.util.evaluateNodeProperty(
-				configAllowedFileTypes,
-				allowedFileTypesType,
-				this,
-				msg
-			);
+			if (attachmentsHeaders) {
+				try {
+					attachmentsHeaders = JSON.parse(attachmentsHeaders);
+				} catch (error) {
+					attachmentsHeaders = undefined;
+				}
+			}
 			const liveChatToken = RED.util.evaluateNodeProperty(
 				liveChatTokenConfig,
 				liveChatTokenConfigType,
@@ -139,7 +138,6 @@ module.exports = function (RED) {
 										rid: roomId,
 										msg: attachment.caption || "User didn't set caption for this attachment",
 										headers: attachmentsHeaders,
-										allowedFileTypes,
 									});
 								} catch (error) {
 									let errorText;
