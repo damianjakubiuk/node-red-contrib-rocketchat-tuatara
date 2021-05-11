@@ -7,7 +7,10 @@
 			"room": "Room",
 			"liveChatTokenConfig": "Live-chat Token",
 			"autocomplete": "Find",
-			"receiving": "Receiving..."
+			"receiving": "Receiving...",
+			"retries": "Reconnect retries",
+			"max-retries": "Max reconnect retries",
+			"retries-interval": "Reconnect retries clear interval"
 		},
 		"origins": {
 			"user": "User",

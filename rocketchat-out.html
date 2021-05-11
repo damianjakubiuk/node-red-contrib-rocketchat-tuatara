@@ -13,6 +13,7 @@
 			<option value="users" data-i18n="rocketchat-out.destinations.users"></option>
 			<option value="rooms" data-i18n="rocketchat-out.destinations.rooms"></option>
 			<option value="live" data-i18n="rocketchat-out.destinations.live"></option>
+			<option value="chatbot_response" data-i18n="rocketchat-out.destinations.chatbot_response"></option>
 		</select>
 	</div>
 	<div class="form-row server-dependent">
@@ -41,8 +42,25 @@
 		<input type="text" id="node-input-messageText" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.messageText">
 	</div>
 	<div class="form-row server-dependent">
-		<label for="node-input-attachments"><i class="fa fa-paperclip"></i> <span data-i18n="rocketchat-out.label.attachments"></span></label>
+		<label for="node-input-attachments">
+			<i class="fa fa-paperclip"></i>
+			<span data-i18n="rocketchat-out.label.attachments"></span>
+		</label>
 		<input type="text" id="node-input-attachments" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.attachments">
+	</div>
+	<div class="form-row server-dependent">
+		<label for="node-input-attachmentsHeaders">
+			<i class="fa fa-paperclip"></i>
+			<span data-i18n="rocketchat-out.label.attachmentsHeaders"></span>
+		</label>
+		<input type="text" id="node-input-attachmentsHeaders" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.attachmentsHeaders">
+	</div>
+	<div class="form-row server-dependent">
+		<label for="node-input-allowedFileTypes">
+			<i class="fa fa-paperclip"></i>
+			<span data-i18n="rocketchat-out.label.allowedFileTypes"></span>
+		</label>
+		<input type="text" id="node-input-allowedFileTypes" style="width: 70%;" data-i18n="[placeholder]rocketchat-out.label.allowedFileTypes">
 	</div>
 	<div class="form-row server-dependent">
 		<label for="node-input-liveChatTokenConfig">
@@ -75,11 +93,23 @@
 			messageTextType: { value: 'str' },
 			liveChatTokenConfig: { value: '', validate: RED.validators.typedInput('liveChatTokenConfigType') },
 			liveChatTokenConfigType: { value: 'str' },
-			attachments: { value: '[]', validate: RED.validators.typedInput('attachmentsType') },
-			attachmentsType: { value: 'json' },
+			attachments: { value: '', validate: RED.validators.typedInput('attachmentsType') },
+			attachmentsType: { value: 'msg' },
+			attachmentsHeaders: {
+				value: '',
+				validate: RED.validators.typedInput('attachmentsHeadersType'),
+				required: false,
+			},
+			attachmentsHeadersType: { value: 'json' },
+			allowedFileTypes: {
+				value: '',
+				validate: RED.validators.typedInput('allowedFileTypesType'),
+				required: false,
+			},
+			allowedFileTypesType: { value: 'json' },
 		},
 		inputs: 1,
-		outputs: 1,
+		outputs: 0,
 		icon: 'rocketchat.png',
 		align: 'right',
 		label: function () {
@@ -155,8 +185,20 @@
 			});
 
 			$('#node-input-attachments').typedInput({
-				default: node.attachmentsType || 'json',
-				types: ['msg', 'flow', 'global', 'env', 'json'],
+				default: node.attachmentsType || 'msg',
+				types: ['msg', 'flow', 'global', 'env'],
+			});
+
+			$('#node-input-attachmentsHeaders').typedInput({
+				default: node.attachmentsHeadersType || 'json',
+				type: 'json',
+				types: ['json'],
+			});
+
+			$('#node-input-allowedFileTypes').typedInput({
+				default: node.allowedFileTypesType || 'json',
+				type: 'json',
+				types: ['json'],
 			});
 
 			$('#node-input-messageText').typedInput('value', node.messageText);
@@ -171,6 +213,10 @@
 			$('#node-input-emojiText').typedInput('type', node.emojiTextType);
 			$('#node-input-attachments').typedInput('value', node.attachments);
 			$('#node-input-attachments').typedInput('type', node.attachmentsType);
+			$('#node-input-attachmentsHeaders').typedInput('value', node.attachmentsHeaders);
+			$('#node-input-attachmentsHeaders').typedInput('type', node.attachmentsHeadersType);
+			$('#node-input-allowedFileTypes').typedInput('value', node.allowedFileTypes);
+			$('#node-input-allowedFileTypes').typedInput('type', node.allowedFileTypesType);
 
 			if (node.roomType === 'form') {
 				const { i, l } = JSON.parse(node.roomData);
@@ -187,6 +233,8 @@
 			node.avatarTextType = $('#node-input-avatarText').typedInput('type');
 			node.emojiTextType = $('#node-input-emojiText').typedInput('type');
 			node.attachmentsType = $('#node-input-attachments').typedInput('type');
+			node.attachmentsHeadersType = $('#node-input-attachmentsHeaders').typedInput('type');
+			node.allowedFileTypesType = $('#node-input-allowedFileTypes').typedInput('type');
 			if (node.roomType === 'form') {
 				node.roomData = JSON.stringify({
 					i: $('#node-input-room-autocomplete-id').val(),

@@ -12,15 +12,18 @@
 			"emoji": "Emoji",
 			"messageText": "Text",
 			"attachments": "Attachments",
-			"liveChatTokenConfig": "Live-chat Token"
+			"liveChatTokenConfig": "Live-chat Token",
+			"attachmentsHeaders" : "attachment headers",
+			"allowedFileTypes": "Allowed file types"
 		},
 		"destinations": {
 			"users": "User",
 			"rooms": "Room",
-			"live": "Live-chat"
+			"live": "Live-chat",
+			"chatbot_response": "Chatbot response"
 		},
 		"errors": {
-			"invalid-data": "Input data is missing",
+			"invalid-data": "Input data is missing: __message__",
 			"error-processing": "Errors processing request: __message__"
 		}
 	}

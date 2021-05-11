@@ -1,4 +1,5 @@
 const api = require('./rocketchat');
+const stringifyError = require('./utils/stringifyError');
 
 module.exports = function (RED) {
 	'use strict';
@@ -9,7 +10,7 @@ module.exports = function (RED) {
 		node.server = RED.nodes.getNode(config.server);
 
 		node.on('input', async function (msg) {
-			const { host, user, token } = node.server;
+			const { host, user, token, department, queueDepartment } = node.server;
 			const {
 				roomType,
 				roomName,
@@ -53,7 +54,7 @@ module.exports = function (RED) {
 					});
 					node.status({});
 				} else {
-					node.error(RED._('rocketchat-create.errors.error-processing', errors));
+					node.error(errors);
 					node.status({
 						fill: 'red',
 						shape: 'ring',
@@ -86,27 +87,69 @@ module.exports = function (RED) {
 								email: liveChatEmail,
 								token: liveChatToken,
 							});
-						} else {
-							await apiInstance.createLiveChatVisitor({
-								name: liveChatName,
-								email: liveChatEmail,
+							await apiInstance.transferVisitorRooms({
 								token: liveChatToken,
+								department: msg.payload.department || department,
 							});
+							processResponse(true, msg.payload);
+						} else {
 							const { success, config } = await apiInstance.getLiveChatConfig({
 								token: liveChatToken,
 							});
-							const { room } = await apiInstance.createLiveChatRoom({ token: liveChatToken });
+							const getLiveChatRoomsResponse = await apiInstance.getLiveChatRooms({
+								visitorToken: liveChatToken,
+							});
+							let room;
+							let newRoom = false;
+							let setCustomField;
+							if (getLiveChatRoomsResponse.rooms.length >= 1) {
+								room = getLiveChatRoomsResponse.rooms[0];
+								await apiInstance.closeVisitorLiveChatRooms({
+									token: liveChatToken,
+									except: [room._id],
+								});
+								if (!msg.payload.whatsapp) {
+									await apiInstance.transferRoom({
+										rid: room._id,
+										department: msg.payload.queueDepartment || queueDepartment,
+									});
+								}
+							} else {
+								await apiInstance.createLiveChatVisitor({
+									name: liveChatName,
+									email: liveChatEmail,
+									token: liveChatToken,
+									department: msg.payload.queueDepartment || queueDepartment,
+								});
+								let createLiveChatRoomResponse = await apiInstance.createLiveChatRoom({
+									token: liveChatToken,
+									rid: name,
+								});
+								room = createLiveChatRoomResponse.room;
+								newRoom = true;
+								setCustomField = await apiInstance.setCustomField({
+									token: liveChatToken,
+									key: 'token',
+									value: liveChatToken,
+									overwrite: true,
+								});
+							}
+							const { officeHours } = await apiInstance.getOfficeHours();
+							config.room = room;
 							config.room_id = room._id;
+							config.newRoom = newRoom;
+							config.officeHours = officeHours;
+							config.setCustomField = setCustomField;
+							config.payload = msg.payload;
 							processResponse(success, config);
 						}
 						break;
 					}
-
 					default:
 						throw new Error('Invalid roomType');
 				}
 			} catch (error) {
-				node.error(RED._('rocketchat-create.errors.error-processing', error));
+				node.error(stringifyError(error));
 				node.status({
 					fill: 'red',
 					shape: 'ring',

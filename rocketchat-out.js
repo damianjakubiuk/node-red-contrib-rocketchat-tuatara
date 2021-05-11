@@ -1,5 +1,5 @@
 const api = require('./rocketchat');
-const EJSON = require('ejson');
+const stringifyError = require('./utils/stringifyError');
 
 module.exports = function (RED) {
 	'use strict';
@@ -20,6 +20,10 @@ module.exports = function (RED) {
 			emojiTextType,
 			attachments: configAttachments,
 			attachmentsType,
+			attachmentsHeaders: configAttachmentsHeaders,
+			attachmentsHeadersType,
+			allowedFileTypes: configAllowedFileTypes,
+			allowedFileTypesType,
 			room,
 			roomType,
 			roomData,
@@ -45,6 +49,18 @@ module.exports = function (RED) {
 			const emoji = RED.util.evaluateNodeProperty(emojiText, emojiTextType, this, msg);
 			const text = RED.util.evaluateNodeProperty(messageText, messageTextType, this, msg);
 			const attachments = RED.util.evaluateNodeProperty(configAttachments, attachmentsType, this, msg);
+			let attachmentsHeaders = RED.util.evaluateNodeProperty(
+				configAttachmentsHeaders,
+				attachmentsHeadersType,
+				this,
+				msg
+			);
+			let allowedFileTypes = RED.util.evaluateNodeProperty(
+				configAllowedFileTypes,
+				allowedFileTypesType,
+				this,
+				msg
+			);
 			const liveChatToken = RED.util.evaluateNodeProperty(
 				liveChatTokenConfig,
 				liveChatTokenConfigType,
@@ -52,9 +68,26 @@ module.exports = function (RED) {
 				msg
 			);
 			if (roomId == null) {
-				node.warn(RED._('rocketchat-out.errors.invalid-data'));
-				node.status({ fill: 'red', shape: 'ring', text: 'rocketchat-out.errors.invalid-data' });
-				return;
+				try {
+					if (config.destination === 'live' || config.destination === 'chatbot_response') {
+						const getLiveChatRoomsResponse = await apiInstance.getLiveChatRooms({
+							visitorToken: liveChatToken,
+						});
+						if (getLiveChatRoomsResponse.rooms.length >= 1) {
+							roomId = getLiveChatRoomsResponse.rooms[0]._id;
+						}
+					} else {
+						throw new Error('roomId cannot be null when destination is not live');
+					}
+				} catch (error) {
+					node.warn(RED._('rocketchat-out.errors.invalid-data', error));
+					node.status({
+						fill: 'red',
+						shape: 'ring',
+						text: RED._('rocketchat-out.errors.invalid-data', error),
+					});
+					return;
+				}
 			}
 
 			node.status({ fill: 'blue', shape: 'dot', text: 'rocketchat-out.label.sending' });
@@ -81,16 +114,52 @@ module.exports = function (RED) {
 						});
 						break;
 					}
+					case 'chatbot_response': {
+						await apiInstance.sendMessage({
+							rid: roomId,
+							msg: text,
+						});
+						break;
+					}
 					case 'live': {
-						try {
-							const response = await apiInstance.liveChatSend({
+						if (Array.isArray(attachments) && attachments.length >= 1) {
+							await apiInstance.sendMessage({
+								rid: roomId,
+								msg: text,
+							});
+							for (const attachment of attachments) {
+								let uri =
+									attachment.video_url ||
+									attachment.audio_url ||
+									attachment.image_url ||
+									attachment.file_url;
+								try {
+									await apiInstance.downloadAndUploadFile({
+										uri,
+										rid: roomId,
+										msg: attachment.caption || "User didn't set caption for this attachment",
+										headers: attachmentsHeaders,
+										allowedFileTypes,
+									});
+								} catch (error) {
+									let errorText;
+									if (error.errorType === 'error-invalid-file-type') {
+										errorText = 'Upload failed because of invalid file type.';
+									} else {
+										errorText = 'Upload failed.';
+									}
+									await apiInstance.sendMessage({
+										msg: errorText,
+										rid: roomId,
+									});
+								}
+							}
+						} else {
+							await apiInstance.liveChatSend({
 								token: liveChatToken,
 								text,
 								rid: roomId,
 							});
-							node.send({ ...msg, response });
-						} catch (error) {
-							throw new Error(roomId + ':' + token + ':' + EJSON.stringify(error));
 						}
 						break;
 					}
@@ -99,7 +168,7 @@ module.exports = function (RED) {
 				}
 				node.status({});
 			} catch (error) {
-				node.error(config.destination + error);
+				node.error(RED._('rocketchat-out.errors.error-processing', stringifyError(error)));
 				node.status({
 					fill: 'red',
 					shape: 'ring',
