@@ -168,7 +168,7 @@ module.exports = function (RED) {
 				}
 				node.status({});
 			} catch (error) {
-				node.error(RED._('rocketchat-out.errors.error-processing', stringifyError(error)));
+				node.error(stringifyError(error));
 				node.status({
 					fill: 'red',
 					shape: 'ring',

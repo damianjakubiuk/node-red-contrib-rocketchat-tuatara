@@ -125,7 +125,7 @@ module.exports = function (RED) {
 							}
 						}
 					} catch (error) {
-						node.error(RED._('rocketchat-in.errors.error-processing', stringifyError(error)));
+						node.error(stringifyError(error));
 						node.status({
 							fill: 'red',
 							shape: 'ring',
@@ -312,7 +312,7 @@ module.exports = function (RED) {
 										break;
 								}
 							} catch (error) {
-								node.error(RED._('rocketchat-in.errors.error-processing', stringifyError(error)));
+								node.error(stringifyError(error));
 								node.status({
 									fill: 'red',
 									shape: 'ring',
@@ -321,7 +321,7 @@ module.exports = function (RED) {
 							}
 						});
 					} catch (error) {
-						node.error(RED._('rocketchat-in.errors.error-processing', stringifyError(error)));
+						node.error(stringifyError(error));
 						node.status({
 							fill: 'red',
 							shape: 'ring',
@@ -332,7 +332,7 @@ module.exports = function (RED) {
 
 				startListening();
 			} catch (error) {
-				node.error(RED._('rocketchat-in.errors.error-processing', stringifyError(error)));
+				node.error(stringifyError(error));
 			}
 		});
 	}
