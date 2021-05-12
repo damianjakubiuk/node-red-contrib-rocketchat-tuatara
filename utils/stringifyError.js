@@ -1,9 +1,9 @@
 const safeStringify = require('./safeStringify');
 
-function hideUnnecessaryInfo(object) {
-	for (const key in object) {
-		if (Object.hasOwnProperty.call(object, key)) {
-			const element = object[key];
+function hideUnnecessaryInfo(output) {
+	for (const key in output) {
+		if (Object.hasOwnProperty.call(output, key)) {
+			const element = output[key];
 			if (typeof element === 'object') {
 				if (element && element.type === 'Buffer') {
 					delete element.data;
@@ -13,6 +13,7 @@ function hideUnnecessaryInfo(object) {
 			}
 		}
 	}
+	return output;
 }
 
 /**
@@ -21,6 +22,6 @@ function hideUnnecessaryInfo(object) {
  * @returns String
  */
 module.exports = function stringifyError(error) {
-	hideUnnecessaryInfo(error);
-	return '' + error + ': ' + safeStringify(error);
+	const safeObject = hideUnnecessaryInfo(JSON.parse(safeStringify(error)));
+	return '' + error + ': ' + safeStringify(safeObject);
 };
