@@ -134,11 +134,9 @@ module.exports = function (RED) {
 									overwrite: true,
 								});
 							}
-							const { officeHours } = await apiInstance.getOfficeHours();
 							config.room = room;
 							config.room_id = room._id;
 							config.newRoom = newRoom;
-							config.officeHours = officeHours;
 							config.setCustomField = setCustomField;
 							config.payload = msg.payload;
 							processResponse(success, config);
