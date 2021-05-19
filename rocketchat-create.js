@@ -93,9 +93,7 @@ module.exports = function (RED) {
 							});
 							processResponse(true, msg.payload);
 						} else {
-							const { success, config } = await apiInstance.getLiveChatConfig({
-								token: liveChatToken,
-							});
+							const config = {};
 							const getLiveChatRoomsResponse = await apiInstance.getLiveChatRooms({
 								visitorToken: liveChatToken,
 							});
@@ -139,7 +137,7 @@ module.exports = function (RED) {
 							config.newRoom = newRoom;
 							config.setCustomField = setCustomField;
 							config.payload = msg.payload;
-							processResponse(success, config);
+							processResponse(true, config);
 						}
 						break;
 					}
