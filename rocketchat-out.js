@@ -74,6 +74,8 @@ module.exports = function (RED) {
 						});
 						if (getLiveChatRoomsResponse.rooms.length >= 1) {
 							roomId = getLiveChatRoomsResponse.rooms[0]._id;
+						} else {
+							throw new Error('roomId cannot be null when destination is not live');
 						}
 					} else {
 						throw new Error('roomId cannot be null when destination is not live');
