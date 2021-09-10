@@ -4,6 +4,8 @@ const url = require('url');
 const api = require('./rocketchat');
 const stringifyError = require('./utils/stringifyError');
 
+const HALF_AN_HOUR = 30 * 60000;
+
 module.exports = function (RED) {
 	'use strict';
 
@@ -333,6 +335,36 @@ module.exports = function (RED) {
 								});
 							}
 						});
+
+						ws.openRoomInterval = setInterval(async () => {
+							try {
+								const getLiveChatRoomsResponse = await apiInstance.getLiveChatRooms({
+									visitorToken: liveChatToken,
+								});
+								if (getLiveChatRoomsResponse.success) {
+									let close = false;
+									if (getLiveChatRoomsResponse.rooms.length >= 1) {
+										close = !getLiveChatRoomsResponse.rooms.some(({ _id }) => _id === roomId);
+									} else {
+										close = true;
+									}
+									if (close) {
+										showConnectionBroken = false;
+										clearTimeout(ws.pingTimeout);
+										clearInterval(ws.pingInterval);
+										clearInterval(ws.openRoomInterval);
+										ws.terminate();
+									}
+								}
+							} catch (error) {
+								node.error(stringifyError(error));
+								node.status({
+									fill: 'red',
+									shape: 'ring',
+									text: RED._('rocketchat-in.errors.error-processing', error),
+								});
+							}
+						}, HALF_AN_HOUR);
 					} catch (error) {
 						node.error(stringifyError(error));
 						node.status({
