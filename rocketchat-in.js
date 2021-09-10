@@ -40,6 +40,7 @@ module.exports = function (RED) {
 
 				const endpoint = `${useSsl ? 'wss://' : 'ws://'}${host}/websocket`;
 
+				let showConnectionBroken = true;
 				let roomId;
 				if (origin === 'user') {
 					roomId = '__my_messages__';
@@ -204,7 +205,9 @@ module.exports = function (RED) {
 							clearTimeout(ws.pingTimeout);
 							clearInterval(ws.pingInterval);
 							ws.pingTimeout = setTimeout(() => {
-								node.warn(RED._('rocketchat-in.errors.connection-broken'));
+								if (showConnectionBroken) {
+									node.warn(RED._('rocketchat-in.errors.connection-broken'));
+								}
 								ws.terminate();
 							}, 30000 + 1000);
 							ws.pingInterval = setInterval(() => {
@@ -234,7 +237,9 @@ module.exports = function (RED) {
 						ws.on('close', () => {
 							// try to reconect in 10 seconds
 							clearInterval(ws.pingInterval);
-							node.warn(RED._('rocketchat-in.errors.connection-broken'));
+							if (showConnectionBroken) {
+								node.warn(RED._('rocketchat-in.errors.connection-broken'));
+							}
 							ws.terminate();
 						});
 
@@ -278,7 +283,7 @@ module.exports = function (RED) {
 											const { eventName, args } = fields;
 											if (eventName === roomId) {
 												const [message] = args;
-												const { rid, u: { _id: fromUser } = {}, token } = message;
+												const { rid, u: { _id: fromUser } = {}, token, t } = message;
 												if (origin === 'live') {
 													if (token !== liveChatToken) {
 														node.send({
@@ -304,6 +309,14 @@ module.exports = function (RED) {
 														});
 													}
 													apiInstance.markAsRead({ rid });
+												}
+												if (t === 'livechat-close') {
+													setTimeout(() => {
+														showConnectionBroken = false;
+														clearTimeout(ws.pingTimeout);
+														clearInterval(ws.pingInterval);
+														ws.terminate();
+													}, 10000);
 												}
 											}
 										}
