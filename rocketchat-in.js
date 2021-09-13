@@ -4,6 +4,8 @@ const url = require('url');
 const api = require('./rocketchat');
 const stringifyError = require('./utils/stringifyError');
 
+const HALF_AN_HOUR = 30 * 60000;
+
 module.exports = function (RED) {
 	'use strict';
 
@@ -40,6 +42,7 @@ module.exports = function (RED) {
 
 				const endpoint = `${useSsl ? 'wss://' : 'ws://'}${host}/websocket`;
 
+				let showConnectionBroken = true;
 				let roomId;
 				if (origin === 'user') {
 					roomId = '__my_messages__';
@@ -204,7 +207,9 @@ module.exports = function (RED) {
 							clearTimeout(ws.pingTimeout);
 							clearInterval(ws.pingInterval);
 							ws.pingTimeout = setTimeout(() => {
-								node.warn(RED._('rocketchat-in.errors.connection-broken'));
+								if (showConnectionBroken) {
+									node.warn(RED._('rocketchat-in.errors.connection-broken'));
+								}
 								ws.terminate();
 							}, 30000 + 1000);
 							ws.pingInterval = setInterval(() => {
@@ -234,7 +239,9 @@ module.exports = function (RED) {
 						ws.on('close', () => {
 							// try to reconect in 10 seconds
 							clearInterval(ws.pingInterval);
-							node.warn(RED._('rocketchat-in.errors.connection-broken'));
+							if (showConnectionBroken) {
+								node.warn(RED._('rocketchat-in.errors.connection-broken'));
+							}
 							ws.terminate();
 						});
 
@@ -278,7 +285,7 @@ module.exports = function (RED) {
 											const { eventName, args } = fields;
 											if (eventName === roomId) {
 												const [message] = args;
-												const { rid, u: { _id: fromUser } = {}, token } = message;
+												const { rid, u: { _id: fromUser } = {}, token, t } = message;
 												if (origin === 'live') {
 													if (token !== liveChatToken) {
 														node.send({
@@ -305,6 +312,14 @@ module.exports = function (RED) {
 													}
 													apiInstance.markAsRead({ rid });
 												}
+												if (t === 'livechat-close') {
+													setTimeout(() => {
+														showConnectionBroken = false;
+														clearTimeout(ws.pingTimeout);
+														clearInterval(ws.pingInterval);
+														ws.terminate();
+													}, 10000);
+												}
 											}
 										}
 										break;
@@ -320,6 +335,36 @@ module.exports = function (RED) {
 								});
 							}
 						});
+
+						ws.openRoomInterval = setInterval(async () => {
+							try {
+								const getLiveChatRoomsResponse = await apiInstance.getLiveChatRooms({
+									visitorToken: liveChatToken,
+								});
+								if (getLiveChatRoomsResponse.success) {
+									let close = false;
+									if (getLiveChatRoomsResponse.rooms.length >= 1) {
+										close = !getLiveChatRoomsResponse.rooms.some(({ _id }) => _id === roomId);
+									} else {
+										close = true;
+									}
+									if (close) {
+										showConnectionBroken = false;
+										clearTimeout(ws.pingTimeout);
+										clearInterval(ws.pingInterval);
+										clearInterval(ws.openRoomInterval);
+										ws.terminate();
+									}
+								}
+							} catch (error) {
+								node.error(stringifyError(error));
+								node.status({
+									fill: 'red',
+									shape: 'ring',
+									text: RED._('rocketchat-in.errors.error-processing', error),
+								});
+							}
+						}, HALF_AN_HOUR);
 					} catch (error) {
 						node.error(stringifyError(error));
 						node.status({
