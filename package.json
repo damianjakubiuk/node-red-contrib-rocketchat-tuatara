@@ -3,10 +3,6 @@
 	"version": "1.0.4",
 	"description": "",
 	"main": "index.js",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/zuhito/node-red-contrib-rocketchat"
-	},
 	"scripts": {
 		"lint": "eslint . --ext .js,.json",
 		"lint:fix": "eslint . --ext .js,.json --fix",
